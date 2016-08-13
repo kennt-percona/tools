@@ -382,5 +382,5 @@ echo "iptables \$op OUTPUT -d \$addr -j DROP" >> ./arb
 echo "" >> ./arb
 
 chmod +x ./init_pxc1 ./init_pxc10 ./start_pxc1 ./start_pxc10 ./stop_pxc ./node_cl ./wipe
-chmod +x ./init_arb ./start_arb ./arb
+chmod +x ./init_arb ./start_arb ./arb ./stop_arb
 
