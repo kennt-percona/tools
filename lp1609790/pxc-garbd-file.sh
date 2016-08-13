@@ -20,6 +20,7 @@
 #               start_arb
 #
 #               arb disconnect 0
+#               arb disconnect 1
 #
 # (afterwards)
 #   Machine 1:  stop_pxc0
@@ -358,9 +359,9 @@ echo "sudo -v" >> ./arb
 echo "" >> ./arb
 
 echo "if [ \"\$1\" == 'connect' ]; then" >> ./arb
-echo "  op='-D'" >> ./arb
+echo "  op=\"-D\"" >> ./arb
 echo "elif [ \"\$1\" == 'disconnect' ]; then" >> ./arb
-echo "  op='-A'" >> ./arb
+echo "  op=\"-A\"" >> ./arb
 echo "else" >> ./arb
 echo "  echo \"Only 'connect' and 'disconnect' are allowed operations : '\$1'\"" >> ./arb
 echo "  exit 1" >> ./arb
@@ -368,15 +369,15 @@ echo "fi" >> ./arb
 echo "" >> ./arb
 
 echo "if [ \"\$2\" -eq 0 ]; then" >> ./arb
-echo "  iptables \$op INPUT -s $LADDR1 -j DROP" >> ./arb
-echo "  iptables \$op INPUT -s $LADDR2 -j DROP" >> ./arb
-echo "  iptables \$op INPUT -s $LADDR3 -j DROP" >> ./arb
+echo "  addr=\"$ipaddr0\"" >> ./arb
 echo "elif [ \"\$2\" -eq 1 ]; then" >> ./arb
-echo "  iptables \$op INPUT -s $LADDR4 -j DROP" >> ./arb
+echo "  addr=\"$ipaddr1\"" >> ./arb
 echo "else" >> ./arb
 echo "  echo \"Only segments 0 and 1 are allowed : '\$2'\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
+
+echo "iptables \$op OUTPUT -d \$addr -j DROP" >> ./arb
 
 echo "" >> ./arb
 
