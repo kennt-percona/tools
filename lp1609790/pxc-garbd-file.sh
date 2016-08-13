@@ -19,8 +19,10 @@
 #   Machine 3:  init_arb
 #               start_arb
 #
-#               arb disconnect 0
-#               arb disconnect 1
+#               sudo arb disconnect 0
+#               sudo arb disconnect 1
+#
+#               sudo arb connect 0
 #
 # (afterwards)
 #   Machine 1:  stop_pxc0
@@ -348,19 +350,17 @@ echo "fi" >> ./node_cl
 echo "$BUILD/bin/mysql -A -uroot -S$BUILD/node\$1/socket.sock" >> ./node_cl
 
 
-echo "" > ./arb
-echo "if [[ \"\$#\" != 2 ]]; then" >> ./arb
+echo "#! /bin/bash" > ./arb
+echo "" >> ./arb
+echo "if [ \"\$#\" -ne 2 ]; then" >> ./arb
 echo "  echo \"Usage: arb [connect | disconnect] <segment-no>\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
-echo "sudo -v" >> ./arb
-echo "" >> ./arb
-
-echo "if [ \"\$1\" == 'connect' ]; then" >> ./arb
+echo "if [ \"\$1\" == \"connect\" ]; then" >> ./arb
 echo "  op=\"-D\"" >> ./arb
-echo "elif [ \"\$1\" == 'disconnect' ]; then" >> ./arb
+echo "elif [ \"\$1\" == \"disconnect\" ]; then" >> ./arb
 echo "  op=\"-A\"" >> ./arb
 echo "else" >> ./arb
 echo "  echo \"Only 'connect' and 'disconnect' are allowed operations : '\$1'\"" >> ./arb
