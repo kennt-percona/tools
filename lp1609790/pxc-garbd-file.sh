@@ -7,22 +7,40 @@
 #   https://bugs.launchpad.net/percona-xtradb-cluster/+bug/1609790
 #
 # This assumes that:
-#	Machine 1: segment0 (3 nodes)
-#   Machine 2: segment1 (1 node), segment10 (arbitrator)
+#	  Machine 1: segment0 (3 nodes)
+#   Machine 2: segment1 (1 node)
+#   Machine 3: segment10 (arbitrator)
+#
+# Procedure:
+#   Machine 1:  init_pxc0
+#               start_pxc0
+#   Machine 2:  init_pxc1
+#               start_pxc1
+#   Machine 3:  init_arb
+#               start_arb
+#
+#               arb disconnect 0
+#
+# (afterwards)
+#   Machine 1:  stop_pxc0
+#   Machine 2:  stop_pxc1
+#   Machine 3:  stop_arb
 
 # check for config file parameter
-if (( "$#" != 3 )); then
+if (( "$#" != 4 )); then
   echo ""
-  echo "Usage:  pxc-config-file <config-file> <machine1-ipaddr> <machine2-ipaddr>"
+  echo "Usage:  pxc-config-file <config-file> <ipaddr-seg0> <ipaddr-seg1> <ipaddr-arb>"
   echo ""
   echo "Creates the following scripts:"
   echo "  init_pxc0  : Creates subdirectories and initializes the datadirs"
   echo "  start_pxc0 : Starts up a 3-node cluster (segment 0)"
-  echo "  stop_pxc0  : Stops the cluster"
   echo "  init_pxc1  : Creates subdirectories and initializes the datadirs"
   echo "  start_pxc1 : Starts up a 1-node cluster (segment 1)"
-  echo "  stop_pxc1  : Stops the cluster"
-  echo "  arb        : connect or disconnect the arb from segment 0"
+  echo "  stop_pxc   : Stops the cluster"
+  echo "  init_arb   : Creates subdirectories"
+  echo "  start_arb  : Starts up the arb"
+  echo "  stop_arb   : Stops the arb"
+  echo "  arb        : connect or disconnect the arb from either segment"
   echo "  node_cl    : Opens a mysql shell to a non-garbd node"
   echo "  wipe       : Stops the cluster, moves datadir to .PREV, removes subdirectories"
   echo ""
@@ -32,40 +50,44 @@ fi
 BUILD=$(pwd)
 
 config_file_path="${1}"
-ipaddr1="${2}"
-ipaddr2="${3}"
+ipaddr0="${2}"
+ipaddr1="${3}"
+ipaddr10="${4}"
 
+echo ""
 echo "Adding scripts:"
 echo "  init_pxc0  : Creates subdirectories and initializes the datadirs"
 echo "  start_pxc0 : Starts up a 3-node cluster (segment 0)"
-echo "  stop_pxc0  : Stops the cluster"
 echo "  init_pxc1  : Creates subdirectories and initializes the datadirs"
 echo "  start_pxc1 : Starts up a 1-node cluster (segment 1)"
-echo "  stop_pxc1  : Stops the cluster"
-echo "  arb        : connect or disconnect the arb from segment 0"
+echo "  stop_pxc   : Stops the cluster"
+echo "  init_arb   : "
+echo "  start_arb  : "
+echo "  stop_arb   : "
+echo "  arb        : connect or disconnect the arb from either segment"
 echo "  node_cl    : Opens a mysql shell to a non-garbd node"
 echo "  wipe       : Stops the cluster, moves datadir to .PREV, removes subdirectories"
-
+echo ""
 
 RBASE1=4100
-LADDR1="$ipaddr1:$(( RBASE1 + 30 ))"
-RADDR1="$ipaddr1:$(( RBASE1 + 20 ))"
+LADDR1="$ipaddr0:$(( RBASE1 + 30 ))"
+RADDR1="$ipaddr0:$(( RBASE1 + 20 ))"
 
 RBASE2=4200
-LADDR2="$ipaddr1:$(( RBASE2 + 30 ))"
-RADDR2="$ipaddr1:$(( RBASE2 + 20 ))"
+LADDR2="$ipaddr0:$(( RBASE2 + 30 ))"
+RADDR2="$ipaddr0:$(( RBASE2 + 20 ))"
 
 RBASE3=4300
-LADDR3="$ipaddr1:$(( RBASE3 + 30 ))"
-RADDR3="$ipaddr1:$(( RBASE3 + 20 ))"
+LADDR3="$ipaddr0:$(( RBASE3 + 30 ))"
+RADDR3="$ipaddr0:$(( RBASE3 + 20 ))"
 
 RBASE4=5000
-LADDR4="$ipaddr2:$(( RBASE4 + 30 ))"
-RADDR4="$ipaddr2:$(( RBASE4 + 20 ))"
+LADDR4="$ipaddr1:$(( RBASE4 + 30 ))"
+RADDR4="$ipaddr1:$(( RBASE4 + 20 ))"
 
 RBASE10=9000
-LADDR10="$ipaddr2:$(( RBASE10 + 30 ))"
-RADDR10="$ipaddr2:$(( RBASE10 + 20 ))"
+LADDR10="$ipaddr10:$(( RBASE10 + 30 ))"
+RADDR10="$ipaddr10:$(( RBASE10 + 20 ))"
 
 
 node1="${BUILD}/node1"
@@ -73,11 +95,6 @@ node2="${BUILD}/node2"
 node3="${BUILD}/node3"
 node4="${BUILD}/node4"
 node10="${BUILD}/node10"
-
-#keyring_node1="${BUILD}/keyring-node1"
-#keyring_node2="${BUILD}/keyring-node2"
-#keyring_node3="${BUILD}/keyring-node3"
-#keyring_node4="${BUILD}/keyring-node4"
 
 innodb_tempdir1="${BUILD}/innodb_tempdir1"
 innodb_tempdir2="${BUILD}/innodb_tempdir2"
@@ -90,7 +107,6 @@ innodb_tempdir4="${BUILD}/innodb_tempdir4"
 #
 echo "echo 'Creating subdirectores'" > ./init_pxc0
 echo "mkdir -p $node1 $node2 $node3" >> ./init_pxc0
-#echo "mkdir -p $keyring_node1 $keyring_node2 $keyring_node3" >> ./init_pxc0
 echo "mkdir -p $innodb_tempdir1  $innodb_tempdir2  $innodb_tempdir3" >> ./init_pxc0
 echo "mkdir -p /tmp/node1 /tmp/node2 /tmp/node3" >> ./init_pxc0
 
@@ -113,8 +129,7 @@ echo -e "\n" >> ./init_pxc0
 # Create the init_pxc1 script 
 #
 echo "echo 'Creating subdirectores'" > ./init_pxc1
-echo "mkdir -p $node4 $node10" >> ./init_pxc1
-#echo "mkdir -p $keyring_node4" >> ./init_pxc1
+echo "mkdir -p $node4" >> ./init_pxc1
 echo "mkdir -p $innodb_tempdir4" >> ./init_pxc1
 echo "mkdir -p /tmp/node4" >> ./init_pxc1
 
@@ -130,6 +145,13 @@ echo -e "\n" >> ./init_pxc1
 echo "\${MID} --datadir=$node4  > ${BUILD}/startup_node4.err 2>&1 || exit 1;" >> ./init_pxc1
 
 echo -e "\n" >> ./init_pxc1
+
+#
+# Create the init_arb script
+#
+echo "echo 'Creating subdirectores'" > ./init_arb
+echo "mkdir -p $node10" >> ./init_arb
+echo -e "\n" >> ./init_arb
 
 
 #
@@ -256,13 +278,17 @@ echo "  fi" >> ./start_pxc1
 echo "done" >> ./start_pxc1
 echo -e "\n\n" >> ./start_pxc1
 
+#
+# Creating start_arb
+#
 
 # Start the garbd
-echo "${BUILD}/bin/garbd --daemon --name=arb --group=my_cluster \\" >> ./start_pxc1
-echo "    --address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc1
-echo "    --options=\"gmcast.listen_addr=tcp://$LADDR10;gmcast.segment=10\" \\" >> ./start_pxc1
-echo "    --log=$node10/node10.err \\" >> ./start_pxc1
-echo "    > $node10/node10.err 2>&1" >> ./start_pxc1
+echo "" > ./start_arb
+echo "${BUILD}/bin/garbd --name=arb --group=my_cluster \\" >> ./start_arb
+echo "    --address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_arb
+echo "    --options=\"gmcast.listen_addr=tcp://$LADDR10;gmcast.segment=10\" \\" >> ./start_arb
+echo "    --log=$node10/node10.err \\" >> ./start_arb
+echo "    > $node10/node10.err 2>&1 &" >> ./start_arb
 
 #
 # Creating stop_pxc
@@ -285,7 +311,11 @@ echo "  ${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock shutdown" >> ./stop_
 echo "  echo 'Server on socket $node1/socket.sock with datadir ${BUILD}/node1 halted'" >> ./stop_pxc
 echo "fi" >> ./stop_pxc
 echo  "" >> ./stop_pxc
-echo "killall garbd"  >> ./stop_pxc
+
+#
+# Creating stop_arb
+#
+echo "killall garbd"  > ./stop_arb
 
 #
 # Creating wipe
@@ -296,11 +326,6 @@ echo "if [ -d $BUILD/node2.PREV ]; then rm -rf $BUILD/node2.PREV; fi;mv $BUILD/n
 echo "if [ -d $BUILD/node3.PREV ]; then rm -rf $BUILD/node3.PREV; fi;mv $BUILD/node3 $BUILD/node3.PREV" >> ./wipe
 echo "if [ -d $BUILD/node4.PREV ]; then rm -rf $BUILD/node4.PREV; fi;mv $BUILD/node4 $BUILD/node4.PREV" >> ./wipe
 echo "if [ -d $BUILD/node10.PREV ]; then rm -rf $BUILD/node10.PREV; fi;mv $BUILD/node10 $BUILD/node10.PREV" >> ./wipe
-
-#echo "rm -rf ${keyring_node1}" >> ./wipe
-#echo "rm -rf ${keyring_node2}" >> ./wipe
-#echo "rm -rf ${keyring_node3}" >> ./wipe
-#echo "rm -rf ${keyring_node4}" >> ./wipe
 
 echo "rm -rf ${innodb_tempdir1}" >> ./wipe
 echo "rm -rf ${innodb_tempdir2}" >> ./wipe
@@ -323,23 +348,35 @@ echo "$BUILD/bin/mysql -A -uroot -S$BUILD/node\$1/socket.sock" >> ./node_cl
 
 
 echo "" > ./arb
-echo "if [[ \"\$#\" != 1 ]]; then" >> ./arb
-echo "  echo \"Usage: arb [connect | disconnect]\"" >> ./arb
+echo "if [[ \"\$#\" != 2 ]]; then" >> ./arb
+echo "  echo \"Usage: arb [connect | disconnect] <segment-no>\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
-echo "if [ \"\$1\" == 'connect']; then" >> ./arb
-echo "  iptables -D INPUT -i lo -p tcp --dport $LADDR10 -j ACCEPT" >> ./arb
-echo "  iptables -D INPUT -i lo -p tcp --dport $LADDR10 -j DROP" >> ./arb
-echo "fi"  >> ./arb
-echo "" >> ./arb
-
-echo "if [ \"\$1\" == 'disconnect']; then" >> ./arb
-echo "  iptables -A INPUT -i lo -p tcp --dport $LADDR10 -j ACCEPT" >> ./arb
-echo "  iptables -A INPUT -i lo -p tcp --dport $LADDR10 -j DROP" >> ./arb
+echo "if [ \"\$1\" == 'connect' ]; then" >> ./arb
+echo "  op='-D'" >> ./arb
+echo "elif [ \"\$1\" == 'disconnect' ]; then" >> ./arb
+echo "  op='-A'" >> ./arb
+echo "else" >> ./arb
+echo "  echo \"Only 'connect' and 'disconnect' are allowed operations : '\$1'\"" >> ./arb
+echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
-chmod +x ./init_pxc0 ./init_pxc1 ./start_pxc0 ./start_pxc1 ./stop_pxc ./node_cl ./arb ./wipe
+echo "if [ \"\$2\" -eq 0 ]; then" >> ./arb
+echo "  iptables \$op INPUT -s $LADDR1 -j DROP" >> ./arb
+echo "  iptables \$op INPUT -s $LADDR2 -j DROP" >> ./arb
+echo "  iptables \$op INPUT -s $LADDR3 -j DROP" >> ./arb
+echo "elif [ \"\$2\" -eq 1 ]; then" >> ./arb
+echo "  iptables \$op INPUT -s $LADDR4 -j DROP" >> ./arb
+echo "else" >> ./arb
+echo "  echo \"Only segments 0 and 1 are allowed : '\$2'\"" >> ./arb
+echo "  exit 1" >> ./arb
+echo "fi" >> ./arb
+
+echo "" >> ./arb
+
+chmod +x ./init_pxc0 ./init_pxc1 ./start_pxc0 ./start_pxc1 ./stop_pxc ./node_cl ./wipe
+chmod +x ./init_arb ./start_arb ./arb
 
