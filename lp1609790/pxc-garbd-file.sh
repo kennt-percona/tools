@@ -354,6 +354,9 @@ echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
+echo "sudo -v" >> ./arb
+echo "" >> ./arb
+
 echo "if [ \"\$1\" == 'connect' ]; then" >> ./arb
 echo "  op='-D'" >> ./arb
 echo "elif [ \"\$1\" == 'disconnect' ]; then" >> ./arb
