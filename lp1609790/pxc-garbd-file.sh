@@ -57,6 +57,11 @@ ipaddr1="${2}"
 ipaddr10="${3}"
 ipaddr0="${4}"
 
+if [[ ! -r "${config_file_path}" ]]; then
+  echo "Cannot find the config file : '${config_file_path}'"
+  exit 1
+fi
+
 echo ""
 echo "Adding scripts:"
 echo "  init_pxc1  : Creates subdirectories and initializes the datadirs"
