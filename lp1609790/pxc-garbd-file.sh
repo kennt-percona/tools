@@ -382,6 +382,7 @@ echo "  echo \"Only segments 1 and 10 are allowed : '\$2'\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 
+echo "iptables \$op INPUT -s \$addr -j DROP" >> ./arb
 echo "iptables \$op OUTPUT -d \$addr -j DROP" >> ./arb
 
 echo "" >> ./arb
