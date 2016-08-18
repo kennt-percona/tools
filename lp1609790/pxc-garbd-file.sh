@@ -435,18 +435,7 @@ echo "  echo \"Usage: node_cl <node_number>\"" >> ./node_cl
 echo "  exit 1" >> ./node_cl
 echo "fi" >> ./node_cl
 echo "" >> ./node_cl
-echo "addresses=( '0' $ipaddr1 $ipaddr1 $ipadr1 $ipaddr2 $ipaddr2 $ipaddr2 )" >> ./node_cl
-echo "ports=('0' $RBASE1 $RBASE2 $RBASE3 $RBASE4 $RBASE5 $RBASE6 )" >> ./node_cl
-echo "if (( \$1 > \${#ports[@]} )); then" >> ./node_cl
-echo "  echo 'Invalid server number: \$1'" >> ./node_cl
-echo "  exit 1" >> ./node_cl
-echo "fi" >> ./node_cl
-echo "" >> ./node_cl
-echo "if [[ \${ports[\$1]} == '0' ]]; then" >> ./node_cl
-echo "  echo 'Invalid server number: \$1'" >> ./node_cl
-echo "  exit 1" >> ./node_cl
-echo "fi" >> ./node_cl
-echo "$BUILD/bin/mysql -A -h\${addresses[\$1]} -P\${ports[\$1]} -uroot " >> ./node_cl
+echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
 
 echo "#! /bin/bash" > ./arb
