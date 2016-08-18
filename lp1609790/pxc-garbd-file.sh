@@ -432,7 +432,7 @@ echo "#! /bin/bash" > ./node_cl
 echo "" >> ./node_cl
 echo "if (( \"\$#\" != 1 )); then" >> ./node_cl
 echo "  echo \"Usage: node_cl <node_number>\"" >> ./node_cl
-echo "  exit 1"
+echo "  exit 1" >> ./node_cl
 echo "fi" >> ./node_cl
 echo "" >> ./node_cl
 echo "addresses=( '0' $ipaddr1 $ipaddr1 $ipadr1 $ipaddr2 $ipaddr2 $ipaddr2 )" >> ./node_cl
