@@ -107,6 +107,7 @@ RBASE10=9000
 LADDR10="$ipaddr10:$(( RBASE10 + 30 ))"
 RADDR10="$ipaddr10:$(( RBASE10 + 20 ))"
 
+CLUSTER_ADDRESS="$LADDR1,$LADDR2,$LADDR3,$LADDR4,$LADDR5,$LADDR6,$LADDR10"
 
 node1="${BUILD}/node1"
 node2="${BUILD}/node2"
@@ -197,7 +198,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE1 \\" >> ./start_pxc1
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc1
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc1
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc1
@@ -224,7 +225,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE2 \\" >> ./start_pxc1
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc1
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc1
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc1
@@ -251,7 +252,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE3 \\" >> ./start_pxc1
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc1
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc1
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR3 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR3;gmcast.segment=1\" \\" >> ./start_pxc1
@@ -286,7 +287,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE4 \\" >> ./start_pxc2
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc2
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR4 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR4;gmcast.segment=2\" \\" >> ./start_pxc2
@@ -311,7 +312,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE5 \\" >> ./start_pxc2
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc2
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR5 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR5;gmcast.segment=2\" \\" >> ./start_pxc2
@@ -336,7 +337,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE6 \\" >> ./start_pxc2
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_pxc2
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR6 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
 echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR6;gmcast.segment=2\" \\" >> ./start_pxc2
@@ -360,7 +361,7 @@ echo -e "\n\n" >> ./start_pxc2
 # Start the garbd
 echo "" > ./start_arb
 echo "${BUILD}/bin/garbd --name=arb --group=my_cluster \\" >> ./start_arb
-echo "    --address=gcomm://$LADDR1,$LADDR2,$LADDR3,$LADDR4 \\" >> ./start_arb
+echo "    --address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_arb
 echo "    --options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR10;gmcast.segment=10\" \\" >> ./start_arb
 echo "    --log=$node10/node10.err \\" >> ./start_arb
 echo "    > $node10/node10.err 2>&1 &" >> ./start_arb
