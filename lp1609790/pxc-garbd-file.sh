@@ -56,7 +56,7 @@ config_file_path="${1}"
 ipaddr1="${2}"
 ipaddr2="${3}"
 ipaddr10="${4}"
-evs_version=0
+evs_options="evs.version=1;evs.auto_evict=1"
 
 if [[ ! -r "${config_file_path}" ]]; then
   echo "Cannot find the config file : '${config_file_path}'"
@@ -201,7 +201,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc1
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc1
 echo "    --wsrep-new-cluster  > $node1/node1.err 2>&1 &" >> ./start_pxc1
 
 echo -e "\n" >> ./start_pxc1
@@ -228,7 +228,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc1
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc1
 echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc1
 
 echo -e "\n" >> ./start_pxc1
@@ -255,7 +255,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
 echo "    --wsrep_sst_receive_address=$RADDR3 \\" >> ./start_pxc1
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc1
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR3;gmcast.segment=1\" \\" >> ./start_pxc1
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR3;gmcast.segment=1\" \\" >> ./start_pxc1
 echo "    > $node3/node3.err 2>&1 &" >> ./start_pxc1
 
 echo -e "\n" >> ./start_pxc1
@@ -290,7 +290,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR4 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR4;gmcast.segment=2\" \\" >> ./start_pxc2
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR4;gmcast.segment=2\" \\" >> ./start_pxc2
 echo "    > $node4/node4.err 2>&1 &" >> ./start_pxc2
 
 echo -e "\n" >> ./start_pxc2
@@ -315,7 +315,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR5 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR5;gmcast.segment=2\" \\" >> ./start_pxc2
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR5;gmcast.segment=2\" \\" >> ./start_pxc2
 echo "    > $node5/node5.err 2>&1 &" >> ./start_pxc2
 
 echo -e "\n" >> ./start_pxc2
@@ -340,7 +340,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR6 \\" >> ./start_pxc2
 echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
-echo "    --wsrep_provider_options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR6;gmcast.segment=2\" \\" >> ./start_pxc2
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR6;gmcast.segment=2\" \\" >> ./start_pxc2
 echo "    > $node6/node6.err 2>&1 &" >> ./start_pxc2
 
 echo -e "\n" >> ./start_pxc2
@@ -362,7 +362,7 @@ echo -e "\n\n" >> ./start_pxc2
 echo "" > ./start_arb
 echo "${BUILD}/bin/garbd --name=arb --group=my_cluster \\" >> ./start_arb
 echo "    --address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_arb
-echo "    --options=\"evs.version=$evs_version;gmcast.listen_addr=tcp://$LADDR10;gmcast.segment=10\" \\" >> ./start_arb
+echo "    --options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR10;gmcast.segment=10\" \\" >> ./start_arb
 echo "    --log=$node10/node10.err \\" >> ./start_arb
 echo "    > $node10/node10.err 2>&1 &" >> ./start_arb
 
