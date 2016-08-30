@@ -25,7 +25,7 @@ wsrep_sst_auth="root:"
 wsrep_cluster_name=cluster
 wsrep_slave_threads=32
 wsrep_max_ws_size=2G
-wsrep_provider_options="gcache.sie=5G;pc.recovery=true"
+wsrep_provider_options="gcache.size=5G;pc.recovery=true"
 wsrep_sync_wait=0
 innodb_autoinc_lock_mode=2
 innodb_locks_unsafe_for_binlog=1
