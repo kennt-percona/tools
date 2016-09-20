@@ -1,0 +1,56 @@
+# Common options
+[mysqld]
+log-bin=master-bin
+binlog-format=ROW
+gtid-mode=ON
+enforce-gtid-consistency
+log-slave-updates
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
+transaction-write-set-extraction=XXHASH64
+innodb-file-per-table
+
+binlog-checksum=NONE
+
+# The following are group replication settings that are
+# very similar to the wsrep settings
+#
+# group-replication 				wsrep
+# =================					=====
+# group-replication-local-address	gmcast.listen_address
+# group-replication-group-seeds 	wsrep-cluster-address
+# group-replication-bootstrap-group --wsrep-new-cluster (cmd-line)
+# group-replication-group-name 		wsrep-cluster-name
+#
+
+[mysqld.1]
+server-id=1
+datadir=/home/kennt/dev/mysql-group-repl/build-bin/node1
+log-error=/home/kennt/dev/mysql-group-repl/build-bin/node1/node1.err
+socket=/home/kennt/dev/mysql-group-repl/build-bin/node1/socket.sock
+early-plugin-load=keyring_file.so
+keyring-file-data=/home/kennt/dev/mysql-group-repl/build-bin/keyring-node1/keyring
+
+[mysqld.2]
+server-id=2
+datadir=/home/kennt/dev/mysql-group-repl/build-bin/node2
+log-error=/home/kennt/dev/mysql-group-repl/build-bin/node2/node2.err
+socket=/home/kennt/dev/mysql-group-repl/build-bin/node2/socket.sock
+early-plugin-load=keyring_file.so
+keyring-file-data=/home/kennt/dev/mysql-group-repl/build-bin/keyring-node2/keyring
+
+[mysqld.3]
+server-id=3
+datadir=/home/kennt/dev/mysql-group-repl/build-bin/node3
+log-error=/home/kennt/dev/mysql-group-repl/build-bin/node3/node3.err
+socket=/home/kennt/dev/mysql-group-repl/build-bin/node3/socket.sock
+early-plugin-load=keyring_file.so
+keyring-file-data=/home/kennt/dev/mysql-group-repl/build-bin/keyring-node3/keyring
+
+[mysqld.4]
+server-id=4
+datadir=/home/kennt/dev/mysql-group-repl/build-bin/node4
+log-error=/home/kennt/dev/mysql-group-repl/build-bin/node4/node4.err
+socket=/home/kennt/dev/mysql-group-repl/build-bin/node4/socket.sock
+early-plugin-load=keyring_file.so
+keyring-file-data=/home/kennt/dev/mysql-group-repl/build-bin/keyring-node4/keyring
