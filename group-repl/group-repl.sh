@@ -130,12 +130,12 @@ echo -e "\n" >> ./init_gr
 echo "sleep 2" >> ./init_gr
 echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./init_gr
 echo "  sleep 1" >> ./init_gr
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock ping > /dev/null 2>&1; then" >> ./init_gr
+echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock ping > /dev/null 2>&1; then" >> ./init_gr
 echo "    break" >> ./init_gr
 echo "  fi" >> ./init_gr
 echo "done" >> ./init_gr
 echo -e "\n" >> ./init_gr
-echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot < ./gr_init.sql >> $node3/node3.err 2>&1" >> ./init_gr
+echo "${BUILD}/bin/mysql -S$node3/socket.sock -uroot < ./gr_init.sql >> $node3/node3.err 2>&1" >> ./init_gr
 echo -e "\n" >> ./init_gr
 echo "${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock shutdown" >> ./init_gr
 
