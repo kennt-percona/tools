@@ -50,7 +50,8 @@ innodb_tempdir3="${BUILD}/innodb_tempdir3"
 #
 # Creating the gr_init.sql script
 # This script is run after initialization to create the necessary users
-# for group replication.
+# for group replication. The "CREATE USER" has to be done only once, changing
+# the master user has to be done on each node.
 #
 echo "" > ./gr_init.sql
 echo "# Create the replication user" >> ./gr_init.sql
@@ -61,6 +62,11 @@ echo ""  >> ./gr_init.sql
 echo "# Setup the credentials for recovery" >> ./gr_init.sql
 echo "CHANGE MASTER TO MASTER_USER='rpl_user', MASTER_PASSWORD='rpl_pass' FOR CHANNEL 'group_replication_recovery';" >> ./gr_init.sql
 echo ""  >> ./gr_init.sql
+
+echo "" > ./gr_init_short.sql
+echo "# Setup the credentials for recovery" >> ./gr_init_short.sql
+echo "CHANGE MASTER TO MASTER_USER='rpl_user', MASTER_PASSWORD='rpl_pass' FOR CHANNEL 'group_replication_recovery';" >> ./gr_init_short.sql
+echo ""  >> ./gr_init_short.sql
 
 
 #
@@ -83,14 +89,13 @@ echo "MID=\"${BUILD}/bin/mysqld \
 echo -e "\n" >> ./init_gr
 
 # Initialize the databases
-echo "\${MID} --server_id=1 --datadir=$node1 > ${BUILD}/startup_node1.err 2>&1 || exit 1;" >> ./init_gr
-echo "\${MID} --server_id=2 --datadir=$node2 > ${BUILD}/startup_node2.err 2>&1 || exit 1;" >> ./init_gr
-echo "\${MID} --server_id=3 --datadir=$node3 > ${BUILD}/startup_node3.err 2>&1 || exit 1;" >> ./init_gr
-echo -e "\n" >> ./init_gr
 
 # After initialization, we have to run a startup script to create
 # the necessary replication users (this can't be done at initialization
 # since it involves account management, i.e. CREATE USER).
+echo -e "\n" >> ./init_gr
+echo "echo 'Initializing node1'" >> ./init_gr
+echo "\${MID} --server_id=1 --datadir=$node1 > ${BUILD}/startup_node1.err 2>&1 || exit 1;" >> ./init_gr
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.1 \\" >> ./init_gr
 echo "    --port=$RBASE1 \\" >> ./init_gr
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA > $node1/node1.err 2>&1 &" >> ./init_gr
@@ -107,6 +112,8 @@ echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot < ./gr_init.sql >> $node1/n
 echo -e "\n" >> ./init_gr
 echo "${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock shutdown" >> ./init_gr
 
+echo "echo 'Initializing node2'" >> ./init_gr
+echo "\${MID} --server_id=2 --datadir=$node2 > ${BUILD}/startup_node2.err 2>&1 || exit 1;" >> ./init_gr
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./init_gr
 echo "    --port=$RBASE2 \\" >> ./init_gr
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA > $node2/node2.err 2>&1 &" >> ./init_gr
@@ -119,10 +126,12 @@ echo "    break" >> ./init_gr
 echo "  fi" >> ./init_gr
 echo "done" >> ./init_gr
 echo -e "\n" >> ./init_gr
-echo "${BUILD}/bin/mysql -S$node2/socket.sock -uroot < ./gr_init.sql >> $node2/node2.err 2>&1" >> ./init_gr
+echo "${BUILD}/bin/mysql -S$node2/socket.sock -uroot < ./gr_init_short.sql >> $node2/node2.err 2>&1" >> ./init_gr
 echo -e "\n" >> ./init_gr
 echo "${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock shutdown" >> ./init_gr
 
+echo "echo 'Initializing node3'" >> ./init_gr
+echo "\${MID} --server_id=3 --datadir=$node3 > ${BUILD}/startup_node3.err 2>&1 || exit 1;" >> ./init_gr
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.3 \\" >> ./init_gr
 echo "    --port=$RBASE3 \\" >> ./init_gr
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA > $node3/node3.err 2>&1 &" >> ./init_gr
@@ -135,7 +144,7 @@ echo "    break" >> ./init_gr
 echo "  fi" >> ./init_gr
 echo "done" >> ./init_gr
 echo -e "\n" >> ./init_gr
-echo "${BUILD}/bin/mysql -S$node3/socket.sock -uroot < ./gr_init.sql >> $node3/node3.err 2>&1" >> ./init_gr
+echo "${BUILD}/bin/mysql -S$node3/socket.sock -uroot < ./gr_init_short.sql >> $node3/node3.err 2>&1" >> ./init_gr
 echo -e "\n" >> ./init_gr
 echo "${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock shutdown" >> ./init_gr
 
@@ -160,8 +169,9 @@ echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_gr
 echo "    --plugin-load=group_replication.so \\" >> ./start_gr
 echo "    --group_replication_group_name="00010002-0003-0004-0005-000600070008" \\" >> ./start_gr
 echo "    --group_replication_local_address=$LADDR1 \\" >> ./start_gr
+echo "    --group_replication_start_on_boot=OFF \\" >> ./start_gr
 echo "    --group_replication_group_seeds=$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_gr
-echo "    --group_replication_bootstrap_group=1  > $node1/node1.err 2>&1 &" >> ./start_gr
+echo "    > $node1/node1.err 2>&1 &" >> ./start_gr
 
 echo -e "\n" >> ./start_gr
 echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_gr
@@ -171,12 +181,18 @@ echo "    break" >> ./start_gr
 echo "  fi" >> ./start_gr
 echo "done" >> ./start_gr
 
+# Now enable group replication
+echo "echo 'Starting group replication on node1'" >> ./start_gr
+echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot -Bse 'SET GLOBAL group_replication_bootstrap_group= 1;' >> $node1/node1.err 2>&1" >> ./start_gr
+echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot -Bse 'START group_replication;' >> $node1/node1.err 2>&1" >> ./start_gr
+echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot -Bse 'SET GLOBAL group_replication_bootstrap_group= 0;' >> $node1/node1.err 2>&1" >> ./start_gr
 echo -e "\n" >> ./start_gr
 
 
 #
 # Starting node 2
 #
+echo "sleep 5" >> ./start_gr
 echo "echo 'Starting node 2..'" >> ./start_gr
 
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_gr
@@ -185,8 +201,9 @@ echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_gr
 echo "    --plugin-load=group_replication.so \\" >> ./start_gr
 echo "    --group_replication_group_name="00010002-0003-0004-0005-000600070008" \\" >> ./start_gr
 echo "    --group_replication_local_address=$LADDR2 \\" >> ./start_gr
+echo "    --group_replication_start_on_boot=OFF \\" >> ./start_gr
 echo "    --group_replication_group_seeds=$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_gr
-echo "    --group_replication_bootstrap_group=0  > $node2/node2.err 2>&1 &" >> ./start_gr
+echo "    > $node2/node2.err 2>&1 &" >> ./start_gr
 
 echo -e "\n" >> ./start_gr
 
@@ -197,12 +214,15 @@ echo "    break" >> ./start_gr
 echo "  fi" >> ./start_gr
 echo "done" >> ./start_gr
 
+echo "echo 'Starting group replication on node2'" >> ./start_gr
+echo "${BUILD}/bin/mysql -S$node2/socket.sock -uroot -Bse 'START group_replication;' >> $node2/node2.err 2>&1" >> ./start_gr
 echo -e "\n" >> ./start_gr
 
 
 #
 # Starting node 3
 #
+echo "sleep 5" >> ./start_gr
 echo "echo 'Starting node 3..'" >> ./start_gr
 
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.3 \\" >> ./start_gr
@@ -211,8 +231,9 @@ echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_gr
 echo "    --plugin-load=group_replication.so \\" >> ./start_gr
 echo "    --group_replication_group_name="00010002-0003-0004-0005-000600070008" \\" >> ./start_gr
 echo "    --group_replication_local_address=$LADDR3 \\" >> ./start_gr
+echo "    --group_replication_start_on_boot=OFF \\" >> ./start_gr
 echo "    --group_replication_group_seeds=$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_gr
-echo "    --group_replication_bootstrap_group=0  > $node3/node3.err 2>&1 &" >> ./start_gr
+echo "    > $node3/node3.err 2>&1 &" >> ./start_gr
 
 echo -e "\n" >> ./start_gr
 
@@ -222,6 +243,9 @@ echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock ping > /dev/null 
 echo "    break" >> ./start_gr
 echo "  fi" >> ./start_gr
 echo "done" >> ./start_gr
+
+echo "echo 'Starting group replication on node3'" >> ./start_gr
+echo "${BUILD}/bin/mysql -S$node3/socket.sock -uroot -Bse 'START group_replication;' >> $node3/node3.err 2>&1" >> ./start_gr
 echo -e "\n\n" >> ./start_gr
 
 
