@@ -12,6 +12,21 @@ innodb-file-per-table
 
 binlog-checksum=NONE
 
+# extras
+binlog-row-image=MINIMAL
+binlog-rows-query-log-events=ON
+log-bin-trust-function-creators=TRUE
+relay-log-recovery=ON
+slave-parallel-type=LOGICAL_CLOCK
+slave-preserve-commit-order=ON
+slave-rows-search-algorithms='INDEX_SCAN,HASH_SCAN'
+slave-type-conversions=ALL_NON_LOSSY
+sync-master-info=1000
+sync-relay-log=1000
+
+slave-parallel-workers=0
+disabled_storage_engines="MYISAM,BLACKHOLE,FEDERATED,ARCHIVE"
+
 # The following are group replication settings that are
 # very similar to the wsrep settings
 #
