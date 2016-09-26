@@ -9,9 +9,7 @@ if (( "$#" != 1 )); then
   echo "  init_pxc  : Creates subdirectories and initializes the datadirs"
   echo "  start_pxc : Starts a 3-node cluster, node 1 is bootstrapped"
   echo "  stop_pxc  : Stops the 3-node cluster"
-  echo "  node1_cl  : Opens a mysql shell to node 1"
-  echo "  node2_cl  : Opens a mysql shell to node 2"
-  echo "  node3_cl  : Opens a mysql shell to node 3"
+  echo "  node_cl   : Opens a mysql shell to a node"
   echo "  wipe      : Stops the cluster, moves datadir to .PREV, removes subdirectories"
   exit 1
 fi
@@ -20,7 +18,7 @@ BUILD=$(pwd)
 
 config_file_path="${1}"
 
-echo "Adding scripts: ./init_pxc | ./start_pxc | ./ stop_pxc | ./node1_cl | ./node2_cl | ./node3_cl | ./wipe"
+echo "Adding scripts: ./init_pxc | ./start_pxc | ./ stop_pxc | ./node_cl | ./wipe"
 
 
 ADDR="127.0.0.1"
@@ -203,9 +201,15 @@ echo "rm -rf /tmp/node3" >> ./wipe
 #
 # Creating command-line scripts
 #
-echo "$BUILD/bin/mysql -A -uroot -S$node1/socket.sock" > ./node1_cl
-echo "$BUILD/bin/mysql -A -uroot -S$node2/socket.sock" > ./node2_cl
-echo "$BUILD/bin/mysql -A -uroot -S$node3/socket.sock" > ./node3_cl
+echo "#! /bin/bash" > ./node_cl
+echo "" >> ./node_cl
+echo "if (( \"\$#\" != 1 )); then" >> ./node_cl
+echo "  echo \"Usage: node_cl <node_number>\"" >> ./node_cl
+echo "  exit 1" >> ./node_cl
+echo "fi" >> ./node_cl
+echo "" >> ./node_cl
+echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
-chmod +x ./init_pxc ./start_pxc ./stop_pxc ./node1_cl ./node2_cl ./node3_cl ./wipe
+
+chmod +x ./init_pxc ./start_pxc ./stop_pxc ./node_cl ./wipe
 
