@@ -73,8 +73,8 @@ LADDR2="$ipaddr1:$(( RBASE2 + 30 ))"
 RADDR2="$ipaddr1:$(( RBASE2 + 20 ))"
 
 RBASE3=5100
-LADDR3="$ipaddr2:$(( RBASE4 + 30 ))"
-RADDR3="$ipaddr2:$(( RBASE4 + 20 ))"
+LADDR3="$ipaddr2:$(( RBASE3 + 30 ))"
+RADDR3="$ipaddr2:$(( RBASE3 + 20 ))"
 
 CLUSTER_ADDRESS="$LADDR1,$LADDR2,$LADDR3"
 
