@@ -294,8 +294,8 @@ echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
-echo "iptables \$op INPUT -s \$ipaddr1 -j DROP" >> ./arb
-echo "iptables \$op OUTPUT -d \$ipaddr1 -j DROP" >> ./arb
+echo "iptables \$op INPUT -s $ipaddr1 -j DROP" >> ./arb
+echo "iptables \$op OUTPUT -d $ipaddr1 -j DROP" >> ./arb
 
 echo "" >> ./arb
 
