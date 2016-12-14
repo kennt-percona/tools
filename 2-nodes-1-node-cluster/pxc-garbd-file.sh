@@ -245,17 +245,10 @@ echo  "" >> ./stop_pxc
 # Creating wipe
 #
 echo "if [ -r ./stop_pxc ]; then ./stop_pxc 2>/dev/null 1>&2; fi" > ./wipe
-echo "if [ -d $BUILD/node1.PREV ]; then rm -rf $BUILD/node1.PREV; fi;mv $BUILD/node1 $BUILD/node1.PREV" >> ./wipe
-echo "if [ -d $BUILD/node2.PREV ]; then rm -rf $BUILD/node2.PREV; fi;mv $BUILD/node2 $BUILD/node2.PREV" >> ./wipe
-echo "if [ -d $BUILD/node3.PREV ]; then rm -rf $BUILD/node3.PREV; fi;mv $BUILD/node3 $BUILD/node3.PREV" >> ./wipe
-echo "if [ -d $BUILD/node4.PREV ]; then rm -rf $BUILD/node4.PREV; fi;mv $BUILD/node4 $BUILD/node4.PREV" >> ./wipe
-echo "if [ -d $BUILD/node5.PREV ]; then rm -rf $BUILD/node5.PREV; fi;mv $BUILD/node5 $BUILD/node5.PREV" >> ./wipe
-echo "if [ -d $BUILD/node6.PREV ]; then rm -rf $BUILD/node6.PREV; fi;mv $BUILD/node6 $BUILD/node6.PREV" >> ./wipe
-echo "if [ -d $BUILD/node10.PREV ]; then rm -rf $BUILD/node10.PREV; fi;mv $BUILD/node10 $BUILD/node10.PREV" >> ./wipe
 
-echo "if [ -d $BUILD-node1 ]; then rm -rf $BUILD/node1" >> ./wipe
-echo "if [ -d $BUILD-node2 ]; then rm -rf $BUILD/node2" >> ./wipe
-echo "if [ -d $BUILD-node3 ]; then rm -rf $BUILD/node3" >> ./wipe
+echo "if [ -d $BUILD/node1 ]; then rm -rf $BUILD/node1; fi" >> ./wipe
+echo "if [ -d $BUILD/node2 ]; then rm -rf $BUILD/node2; fi" >> ./wipe
+echo "if [ -d $BUILD/node3 ]; then rm -rf $BUILD/node3; fi" >> ./wipe
 
 echo "rm -rf /tmp/node1" >> ./wipe
 echo "rm -rf /tmp/node2" >> ./wipe
@@ -263,6 +256,9 @@ echo "rm -rf /tmp/node3" >> ./wipe
 echo "rm -rf /tmp/node4" >> ./wipe
 echo "rm -rf /tmp/node5" >> ./wipe
 echo "rm -rf /tmp/node6" >> ./wipe
+
+echo "rm ./init_pxc1 ./init_pxc2 ./start_pxc1 ./start_pxc2 ./stop_pxc ./node_cl ./arb" >> ./wipe
+echo "" >> ./wipe
 
 #
 # Creating command-line scripts
