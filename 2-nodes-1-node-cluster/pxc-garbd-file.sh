@@ -275,8 +275,8 @@ echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
 echo "#! /bin/bash" > ./arb
 echo "" >> ./arb
-echo "if [ \"\$#\" -ne 2 ]; then" >> ./arb
-echo "  echo \"Usage: arb [connect | disconnect] <segment-no>\"" >> ./arb
+echo "if [ \"\$#\" -ne 1 ]; then" >> ./arb
+echo "  echo \"Usage: arb [connect | disconnect | list]\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
@@ -285,23 +285,17 @@ echo "if [ \"\$1\" == \"connect\" ]; then" >> ./arb
 echo "  op=\"-D\"" >> ./arb
 echo "elif [ \"\$1\" == \"disconnect\" ]; then" >> ./arb
 echo "  op=\"-A\"" >> ./arb
+echo "elif [ \"\$1\" == \"list\" ]; then" >> ./arb
+echo "  iptables --list" >> ./arb
+echo "  exit $?">> ./arb
 echo "else" >> ./arb
-echo "  echo \"Only 'connect' and 'disconnect' are allowed operations : '\$1'\"" >> ./arb
+echo "  echo \"Only 'connect','disconnect', and 'list' are allowed operations : '\$1'\"" >> ./arb
 echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
-echo "if [ \"\$2\" -eq 1 ]; then" >> ./arb
-echo "  addr=\"$ipaddr1\"" >> ./arb
-echo "elif [ \"\$2\" -eq 2 ]; then" >> ./arb
-echo "  addr=\"$ipaddr2\"" >> ./arb
-echo "else" >> ./arb
-echo "  echo \"Only segments 1 and 2 are allowed : '\$2'\"" >> ./arb
-echo "  exit 1" >> ./arb
-echo "fi" >> ./arb
-
-echo "iptables \$op INPUT -s \$addr -j DROP" >> ./arb
-echo "iptables \$op OUTPUT -d \$addr -j DROP" >> ./arb
+echo "iptables \$op INPUT -s \$ipaddr1 -j DROP" >> ./arb
+echo "iptables \$op OUTPUT -d \$ipaddr1 -j DROP" >> ./arb
 
 echo "" >> ./arb
 
