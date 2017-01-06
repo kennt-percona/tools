@@ -12,6 +12,8 @@ log-output=none
 wsrep-sst-method=mysqldump
 wsrep-sst-auth="root:"
 
+wsrep-debug=ON
+
 #user=kennt
 binlog-format=ROW
 wsrep-cluster-name=my_cluster

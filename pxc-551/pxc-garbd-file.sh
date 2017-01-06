@@ -215,7 +215,7 @@ echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
 echo "    --wsrep_sst_receive_address=$RADDR3 \\" >> ./start_pxc2
-echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc2
+echo "    --wsrep_node_incoming_address=$ipaddr2 \\" >> ./start_pxc2
 echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR3;gmcast.segment=1\" \\" >> ./start_pxc2
 echo "    > $node3/node3.err 2>&1 &" >> ./start_pxc2
 
