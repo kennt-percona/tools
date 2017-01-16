@@ -47,7 +47,7 @@ config_file_path="${1}"
 ipaddr1="${2}"
 
 # additional options to be passed to wsrep_provider_options
-wsrep_options="gcache.size=0.5M;gcache.page_size=0.1M;gcache.keep_pages_size=1M;gcache.keep_pages_count=10"
+wsrep_options="gcache.size=1M;gcache.page_size=1M;gcache.keep_pages_size=2M;gcache.keep_pages_count=2"
 
 if [[ ! -r "${config_file_path}" ]]; then
   echo "Cannot find the config file : '${config_file_path}'"
@@ -103,11 +103,11 @@ echo -e "\n" >> ./init_pxc
 #
 # Creating start_pxc
 #
-echo "PXC_MYEXTRA=\"\"" > ./start_pxc
-echo "PXC_START_TIMEOUT=30"  >> ./start_pxc
-echo -e "\n" >> ./start_pxc
-echo "echo 'Starting PXC nodes..'" >> ./start_pxc
-echo -e "\n" >> ./start_pxc
+echo "PXC_MYEXTRA=\"\"" > ./start_pxc1
+echo "PXC_START_TIMEOUT=30"  >> ./start_pxc1
+echo -e "\n" >> ./start_pxc1
+echo "echo 'Starting PXC nodes..'" >> ./start_pxc1
+echo -e "\n" >> ./start_pxc1
 
 
 #
