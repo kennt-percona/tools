@@ -294,6 +294,7 @@ echo "  op=\"-D\"" >> ./arb
 echo "elif [ \"\$1\" == \"disconnect\" ]; then" >> ./arb
 echo "  op=\"-A\"" >> ./arb
 echo "elif [ \"\$1\" == \"list\" ]; then" >> ./arb
+echo "  date +%H:%M:%S.%0N -u" >> ./arb
 echo "  iptables --list" >> ./arb
 echo "  exit $?">> ./arb
 echo "else" >> ./arb
@@ -302,6 +303,7 @@ echo "  exit 1" >> ./arb
 echo "fi" >> ./arb
 echo "" >> ./arb
 
+echo "  date +%H:%M:%S.%0N -u" >> ./arb
 echo "iptables \$op INPUT -s $ipaddr1 -j DROP" >> ./arb
 echo "iptables \$op OUTPUT -d $ipaddr1 -j DROP" >> ./arb
 
