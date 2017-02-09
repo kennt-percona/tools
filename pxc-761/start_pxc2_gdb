@@ -1,0 +1,17 @@
+PXC_MYEXTRA=""
+PXC_START_TIMEOUT=30
+
+
+echo 'Starting PXC nodes..'
+
+
+echo 'Starting node 3..'
+gdb --args /home/kennt/dev/pxc/build-bin/bin/mysqld --defaults-file=garbd.cnf --defaults-group-suffix=.3 \
+    --port=5100 --gdb \
+    --basedir=/home/kennt/dev/pxc/build-bin $PXC_MYEXTRA \
+    --wsrep-provider=/home/kennt/dev/pxc/build-bin/lib/libgalera_smm.so \
+    --wsrep_cluster_address=gcomm://192.168.86.102:4130,192.168.86.102:4230,192.168.86.105:5130 \
+    --wsrep_sst_receive_address=192.168.86.105:5100 \
+    --wsrep_node_incoming_address=192.168.86.105 \
+    --wsrep_provider_options=";gmcast.listen_addr=tcp://192.168.86.105:5130;gmcast.segment=1;debug=yes" 
+
