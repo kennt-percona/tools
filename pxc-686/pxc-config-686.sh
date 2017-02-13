@@ -47,7 +47,7 @@ config_file_path="${1}"
 ipaddr1="${2}"
 
 # additional options to be passed to wsrep_provider_options
-wsrep_options="gcache.size=1M;gcache.page_size=1M;gcache.keep_pages_size=2M;gcache.keep_pages_count=2"
+wsrep_options="gcache.size=1M;gcache.page_size=1M;gcache.keep_pages_size=20M;gcache.keep_pages_count=2"
 
 if [[ ! -r "${config_file_path}" ]]; then
   echo "Cannot find the config file : '${config_file_path}'"
@@ -140,7 +140,7 @@ echo -e "\n" >> ./start_pxc1
 #
 # Starting node 2
 #
-echo "echo 'Starting node 2..'" >> ./start_pxc2
+echo "echo 'Starting node 2..'" > ./start_pxc2
 
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2
 echo "    --port=$RBASE2 \\" >> ./start_pxc2
@@ -164,7 +164,7 @@ echo "done" >> ./start_pxc2
 echo -e "\n" >> ./start_pxc2
 
 
-echo "echo 'Starting node 2..'" >> ./start_pxc2_gdb
+echo "echo 'Starting node 2 (gdb)..'" > ./start_pxc2_gdb
 
 echo "gdb --args ${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2_gdb
 echo "    --gdb \\" >> ./start_pxc2_gdb
@@ -174,19 +174,10 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2_gdb
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2_gdb
 echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc2_gdb
 echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc2_gdb
-echo "    --wsrep_provider_options=\"$wsrep_options;gmcast.listen_addr=tcp://$LADDR2\" \\" >> ./start_pxc2_gdb
-echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc2_gdb
+echo "    --wsrep_provider_options=\"$wsrep_options;gmcast.listen_addr=tcp://$LADDR2\" " >> ./start_pxc2_gdb
 
 echo -e "\n" >> ./start_pxc2_gdb
 
-echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc2_gdb
-echo "  sleep 1" >> ./start_pxc2_gdb
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc2_gdb
-echo "    break" >> ./start_pxc2_gdb
-echo "  fi" >> ./start_pxc2_gdb
-echo "done" >> ./start_pxc2_gdb
-
-echo -e "\n" >> ./start_pxc2_gdb
 
 
 #

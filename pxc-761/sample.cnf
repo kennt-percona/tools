@@ -9,7 +9,7 @@ sql-mode=no_engine_substitution
 secure-file-priv=
 wsrep-slave-threads=2
 log-output=none
-wsrep-sst-method=mysqldump
+wsrep-sst-method=xtrabackup-v2
 wsrep-sst-auth="root:"
 
 wsrep-debug=ON
@@ -48,4 +48,7 @@ datadir=/home/kennt/dev/pxc/build-bin/node2
 log-error=/home/kennt/dev/pxc/build-bin/node2/error.log
 wsrep-node-name=node2
 socket=/home/kennt/dev/pxc/build-bin/node2/socket.sock
+
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
 

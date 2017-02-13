@@ -15,7 +15,8 @@
 #   Machine 1:  init_master
 #               start_master
 #               init_pxc
-#               start_pxc
+#               start_pxc1
+#               start_pxc2
 #
 # (afterwards)
 #   Machine 1:  stop_pxc
@@ -34,7 +35,8 @@ if (( "$#" != 2 )); then
   echo "  init_master  : Creates subdirectories and initializes the master datadir"
   echo "  start_master : Starts up the async master node"
   echo "  init_pxc     : Creates subdirectories and initializes the cluster datadir"
-  echo "  start_pxc    : Starts up a 2-node cluster"
+  echo "  start_pxc1   : Starts up node 1 (the async slave)"
+  echo "  start_pxc2   : Starts up node 2"
   echo "  stop_master  : Stops the async master node"
   echo "  stop_pxc     : Stops the cluster"
   echo "  node_cl      : Opens a mysql shell to a node"
@@ -58,7 +60,8 @@ echo "Adding scripts:"
 echo "  init_master  : Creates subdirectories and initializes the datadirs"
 echo "  start_master : Starts up the async master"
 echo "  init_pxc     : Creates subdirectories and initializes the datadirs"
-echo "  start_pxc    : Starts up a 2-node cluster"
+echo "  start_pxc1   : Starts up node 1 (the async slave)"
+echo "  start_pxc2   : Starts up node 2"
 echo "  stop_master  : Stops the async master"
 echo "  stop_pxc     : Stops the cluster"
 echo "  node_cl      : Opens a mysql shell to a node"
@@ -185,81 +188,108 @@ echo -e "\n" >> ./start_master
 
 
 #
-# Creating start_pxc
+# Creating start_pxc1
 #
-echo "PXC_MYEXTRA=\"\"" > ./start_pxc
-echo "PXC_START_TIMEOUT=30"  >> ./start_pxc
-echo -e "\n" >> ./start_pxc
-echo "echo 'Starting PXC nodes..'" >> ./start_pxc
-echo -e "\n" >> ./start_pxc
+echo "PXC_MYEXTRA=\"\"" > ./start_pxc1
+echo "PXC_START_TIMEOUT=30"  >> ./start_pxc1
+echo -e "\n" >> ./start_pxc1
+echo "echo 'Starting PXC nodes..'" >> ./start_pxc1
+echo -e "\n" >> ./start_pxc1
 
 
 #
 # Starting node 1
 #
-echo "echo 'Starting node 1..'" >> ./start_pxc
+echo "echo 'Starting node 1..'" >> ./start_pxc1
 
-echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.1 \\" >> ./start_pxc
-echo "    --port=$RBASE1 \\" >> ./start_pxc
-echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc
-echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc
-echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc
-echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc
-echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc
-echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc
-echo "    --wsrep-new-cluster  > $node1/node1.err 2>&1 &" >> ./start_pxc
+echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.1 \\" >> ./start_pxc1
+echo "    --port=$RBASE1 \\" >> ./start_pxc1
+echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc1
+echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc1
+echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc1
+echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc1
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc1
+echo "    --wsrep-new-cluster  > $node1/node1.err 2>&1 &" >> ./start_pxc1
 
-echo -e "\n" >> ./start_pxc
+echo -e "\n" >> ./start_pxc1
 
-echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc
-echo "  sleep 1" >> ./start_pxc
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc
-echo "    break" >> ./start_pxc
-echo "  fi" >> ./start_pxc
-echo "done" >> ./start_pxc
+echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc1
+echo "  sleep 1" >> ./start_pxc1
+echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc1
+echo "    break" >> ./start_pxc1
+echo "  fi" >> ./start_pxc1
+echo "done" >> ./start_pxc1
 
-echo -e "\n" >> ./start_pxc
+echo -e "\n" >> ./start_pxc1
+
+echo "echo 'Setting up the user account on the slave'" >> ./start_pxc1
+echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc1
+echo "STOP SLAVE;" >> ./start_pxc1
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEM, MASTER_USER='repl', MASTER_PASSWORD='repl';" >> ./start_pxc1
+echo "EOF" >> ./start_pxc1
+
+echo -e "\n" >> ./start_pxc1
+
+#echo "echo 'Starting async replication on node 1'" >> ./start_pxc1
+#echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc1
+#echo "START SLAVE;" >> ./start_pxc1
+#echo "SHOW SLAVE STATUS;" >> ./start_pxc1
+#echo "EOF" >> ./start_pxc1
+#echo -e "\n" >> ./start_pxc1
 
 
 #
 # Starting node 2
 #
-echo "echo 'Starting node 2..'" >> ./start_pxc
+echo "PXC_MYEXTRA=\"\"" > ./start_pxc2
+echo "PXC_START_TIMEOUT=30"  >> ./start_pxc2
+echo -e "\n" >> ./start_pxc2
+echo "echo 'Starting PXC nodes..'" >> ./start_pxc2
+echo -e "\n" >> ./start_pxc2
 
-echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc
-echo "    --port=$RBASE2 \\" >> ./start_pxc
-echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc
-echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc
-echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc
-echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc
-echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc
-echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc
-echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc
+echo "echo 'Starting node 2..'" > ./start_pxc2
 
-echo -e "\n" >> ./start_pxc
+echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2
+echo "    --port=$RBASE2 \\" >> ./start_pxc2
+echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
+echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2
+echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc2
+echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc2
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc2
+echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc2
 
-echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc
-echo "  sleep 1" >> ./start_pxc
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc
-echo "    break" >> ./start_pxc
-echo "  fi" >> ./start_pxc
-echo "done" >> ./start_pxc
+echo -e "\n" >> ./start_pxc2
 
-echo -e "\n" >> ./start_pxc
+echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc2
+echo "  sleep 1" >> ./start_pxc2
+echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc2
+echo "    break" >> ./start_pxc2
+echo "  fi" >> ./start_pxc2
+echo "done" >> ./start_pxc2
 
-echo "echo 'Setting up the user account on the slave'" >> ./start_pxc
-echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEM, MASTER_USER='repl', MASTER_PASSWORD='repl';" >> ./start_pxc
-echo "EOF" >> ./start_pxc
+echo -e "\n" >> ./start_pxc2
 
-echo -e "\n" >> ./start_pxc
+#
+# Starting node 2 (with gdb)
+#
+echo "PXC_MYEXTRA=\"\"" > ./start_pxc2_gdb
+echo "PXC_START_TIMEOUT=30"  >> ./start_pxc2_gdb
+echo -e "\n" >> ./start_pxc2_gdb
+echo "echo 'Starting PXC nodes..'" >> ./start_pxc2_gdb
+echo -e "\n" >> ./start_pxc2_gdb
 
-echo "echo 'Starting async replication on node 1'" >> ./start_pxc
-echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc
-echo "START SLAVE;" >> ./start_pxc
-echo "SHOW SLAVE STATUS;" >> ./start_pxc
-echo "EOF" >> ./start_pxc
-echo -e "\n" >> ./start_pxc
+echo "echo 'Starting node 2..'" >> ./start_pxc2_gdb
+echo "gdb --args ${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2_gdb
+echo "    --port=$RBASE2 --gdb \\" >> ./start_pxc2_gdb
+echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2_gdb
+echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2_gdb
+echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2_gdb
+echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc2_gdb
+echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc2_gdb
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc2_gdb
+echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc2_gdb
 
 
 #
@@ -286,6 +316,15 @@ echo "  echo 'Server on socket $node1/socket.sock with datadir ${BUILD}/node1 ha
 echo "fi" >> ./stop_pxc
 echo  "" >> ./stop_pxc
 
+#
+# Creating stop_pxc2
+#
+echo "" > ./stop_pxc2
+echo "if [[ -r $node2/socket.sock ]]; then" >> ./stop_pxc2
+echo "  ${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock shutdown" >> ./stop_pxc2
+echo "  echo 'Server on socket $node2/socket.sock with datadir ${BUILD}/node2 halted'" >> ./stop_pxc2
+echo "fi" >> ./stop_pxc2
+
 
 #
 # Creating wipe
@@ -301,7 +340,8 @@ echo "rm -rf /tmp/node1" >> ./wipe
 echo "rm -rf /tmp/node2" >> ./wipe
 echo "rm -rf /tmp/nodem" >> ./wipe
 
-echo "rm ./init_master ./init_pxc ./start_master ./start_pxc ./stop_master ./stop_pxc ./node_cl " >> ./wipe
+echo "rm ./init_master ./init_pxc ./start_master ./start_pxc1 ./start_pxc2 ./start_pxc2_gdb" >> ./wipe
+echo "rm ./stop_master ./stop_pxc ./stop_pxc2 ./node_cl " >> ./wipe
 echo "" >> ./wipe
 
 #
@@ -316,6 +356,6 @@ echo "fi" >> ./node_cl
 echo "" >> ./node_cl
 echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
-chmod +x ./init_master ./init_pxc ./start_master ./start_pxc 
-chmod +x ./stop_master ./stop_pxc ./node_cl ./wipe
+chmod +x ./init_master ./init_pxc ./start_master ./start_pxc1 ./start_pxc2 ./start_pxc2_gdb
+chmod +x ./stop_master ./stop_pxc ./stop_pxc2 ./node_cl ./wipe
 
