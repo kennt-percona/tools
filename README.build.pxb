@@ -1,0 +1,4 @@
+cd build
+cmake -DBUILD_CONFIG=xtrabackup_release -DDOWNLOAD_BOOST=1 -DWITH_BOOST=~/dev/pxb/boost .. &&  make -j4
+make DESTDIR=./bin install
+
