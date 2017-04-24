@@ -20,7 +20,7 @@
 #
 # (afterwards)
 #   Machine 1:  stop_pxc
-#               stop_mster
+#               stop_master
 #
 # (cleanup)
 #   Machine 1:  wipe

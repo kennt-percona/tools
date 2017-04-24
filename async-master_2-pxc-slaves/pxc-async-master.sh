@@ -106,7 +106,7 @@ echo "\${MID} --datadir=$nodem  > ${BUILD}/startup_nodem.err 2>&1 || exit 1;" >>
 
 echo -e "\n" >> ./init_master
 
-echo "echo 'Starting up async master to create users'"
+echo "echo 'Starting up async master to create users'" >> ./init_master
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.m \\" >> ./init_master
 echo "    --port=$RBASEM \\" >> ./init_master
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA > $nodem/nodem.err 2>&1 &" >> ./init_master
