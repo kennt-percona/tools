@@ -248,7 +248,7 @@ echo -e "\n" >> ./start_pxc2
 echo "echo 'Starting PXC nodes..'" >> ./start_pxc2
 echo -e "\n" >> ./start_pxc2
 
-echo "echo 'Starting node 2..'" > ./start_pxc2
+echo "echo 'Starting node 2..'" >> ./start_pxc2
 
 echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2
 echo "    --port=$RBASE2 \\" >> ./start_pxc2

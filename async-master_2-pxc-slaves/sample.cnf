@@ -1,16 +1,22 @@
 # Common options
 [mysqld]
 skip-performance-schema
+skip-slave-start
 innodb-file-per-table
 innodb-autoinc-lock-mode=2
 innodb-locks-unsafe-for-binlog=1
 innodb-flush-method=O_DIRECT
+innodb_flush_log_at_trx_commit=2
 sql-mode=no_engine_substitution
 secure-file-priv=
 wsrep-slave-threads=2
 log-output=none
 wsrep-sst-method=xtrabackup-v2
 wsrep-sst-auth="root:"
+
+gtid-mode=ON
+enforce-gtid-consistency=1
+
 
 wsrep-debug=ON
 
@@ -42,12 +48,28 @@ log-error=/home/kennt/dev/pxc/build-bin/node1/error.log
 wsrep-node-name=node1
 socket=/home/kennt/dev/pxc/build-bin/node1/socket.sock
 
+slave-parallel-workers=1
+
 [mysqld.2]
+log-slave-updates=1
+log-bin=binlog
 server-id=2
 datadir=/home/kennt/dev/pxc/build-bin/node2
 log-error=/home/kennt/dev/pxc/build-bin/node2/error.log
 wsrep-node-name=node2
 socket=/home/kennt/dev/pxc/build-bin/node2/socket.sock
+
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
+
+[mysqld.3]
+log-slave-updates=1
+log-bin=binlog
+server-id=3
+datadir=/home/kennt/dev/pxc/build-bin/node3
+log-error=/home/kennt/dev/pxc/build-bin/node3/error.log
+wsrep-node-name=node3
+socket=/home/kennt/dev/pxc/build-bin/node3/socket.sock
 
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
