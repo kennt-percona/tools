@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
-#include <mysql.h>
+#include <mysql/mysql.h>
 #include <errno.h>
 
 static       char **HOSTS     = NULL;
