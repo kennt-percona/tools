@@ -7,10 +7,10 @@ if (( "$#" != 2 )); then
   echo ""
   echo "Creates the following scripts:"
   echo "  init_pxc  : Creates subdirectories and initializes the datadirs"
-  echo "  start_pxc : Starts a 3-node cluster, node 1 is bootstrapped"
-  echo "  stop_pxc  : Stops the 3-node cluster"
-  echo "  node_cl  : Opens a mysql shell to a node"
-  echo "  wipe      : Stops the cluster, moves datadir to .PREV, removes subdirectories"
+  echo "  start_pxc : Starts a 2-node cluster, node 1 is bootstrapped"
+  echo "  stop_pxc  : Stops the 2-node cluster"
+  echo "  node_cl   : Opens a mysql shell to a node"
+  echo "  wipe      : Stops the cluster, removes subdirectories"
   exit 1
 fi
 
@@ -31,31 +31,18 @@ RBASE2=4200
 LADDR2="$ADDR:$(( RBASE2 + 30 ))"
 RADDR2="$ADDR:$(( RBASE2 + 20 ))"
 
-RBASE3=4300
-LADDR3="$ADDR:$(( RBASE3 + 30 ))"
-RADDR3="$ADDR:$(( RBASE3 + 20 ))"
-
-
 node1="${BUILD}/node1"
 node2="${BUILD}/node2"
-node3="${BUILD}/node3"
 
 keyring_node1="${BUILD}/keyring-node1"
 keyring_node2="${BUILD}/keyring-node2"
-keyring_node3="${BUILD}/keyring-node3"
-
-innodb_tempdir1="${BUILD}/innodb_tempdir1"
-innodb_tempdir2="${BUILD}/innodb_tempdir2"
-innodb_tempdir3="${BUILD}/innodb_tempdir3"
-
 
 #
 # Create the init_pxc script 
 #
 echo "echo 'Creating subdirectores'" > ./init_pxc
-echo "mkdir -p $node1 $node2 $node3" >> ./init_pxc
-echo "mkdir -p $keyring_node1 $keyring_node2 $keyring_node3" >> ./init_pxc
-echo "mkdir -p $innodb_tempdir1  $innodb_tempdir2  $innodb_tempdir3" >> ./init_pxc
+echo "mkdir -p $node1 $node2" >> ./init_pxc
+echo "mkdir -p $keyring_node1 $keyring_node2" >> ./init_pxc
 echo "mkdir -p /tmp/node1 /tmp/node2 /tmp/node3 " >> ./init_pxc
 
 echo "echo 'Initializing datadirs'" >> ./init_pxc
@@ -69,7 +56,6 @@ echo -e "\n" >> ./init_pxc
 
 echo "\${MID} --datadir=$node1  > ${BUILD}/startup_node1.err 2>&1 || exit 1;" >> ./init_pxc
 echo "\${MID} --datadir=$node2  > ${BUILD}/startup_node2.err 2>&1 || exit 1;" >> ./init_pxc
-echo "\${MID} --datadir=$node3  > ${BUILD}/startup_node3.err 2>&1 || exit 1;" >> ./init_pxc
 
 echo -e "\n" >> ./init_pxc
 
@@ -93,7 +79,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE1 \\" >> ./start_pxc
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_pxc
+echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2 \\" >> ./start_pxc
 echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc
 echo "    --wsrep_node_incoming_address=$ADDR \\" >> ./start_pxc
 echo "    --wsrep_provider_options=gmcast.listen_addr=tcp://$LADDR1 \\" >> ./start_pxc
@@ -121,7 +107,7 @@ echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults
 echo "    --port=$RBASE2 \\" >> ./start_pxc
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_pxc
+echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2 \\" >> ./start_pxc
 echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc
 echo "    --wsrep_node_incoming_address=$ADDR \\" >> ./start_pxc
 echo "    --wsrep_provider_options=gmcast.listen_addr=tcp://$LADDR2 \\" >> ./start_pxc
@@ -141,39 +127,9 @@ echo -e "\n" >> ./start_pxc
 
 
 #
-# Starting node 3
-#
-echo "echo 'Starting node 3..'" >> ./start_pxc
-
-echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults-group-suffix=.3 \\" >> ./start_pxc
-echo "    --port=$RBASE3 \\" >> ./start_pxc
-echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc
-echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc
-echo "    --wsrep_cluster_address=gcomm://$LADDR1,$LADDR2,$LADDR3 \\" >> ./start_pxc
-echo "    --wsrep_sst_receive_address=$RADDR3 \\" >> ./start_pxc
-echo "    --wsrep_node_incoming_address=$ADDR \\" >> ./start_pxc
-echo "    --wsrep_provider_options=gmcast.listen_addr=tcp://$LADDR3 \\" >> ./start_pxc
-#echo "    --wsrep_node_address=$RADDR3  \\" >> ./start_pxc
-echo "    > $node3/node3.err 2>&1 &" >> ./start_pxc
-
-echo -e "\n" >> ./start_pxc
-
-echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./start_pxc
-echo "  sleep 1" >> ./start_pxc
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock ping > /dev/null 2>&1; then" >> ./start_pxc
-echo "    break" >> ./start_pxc
-echo "  fi" >> ./start_pxc
-echo "done" >> ./start_pxc
-echo -e "\n\n" >> ./start_pxc
-
-
-#
 # Creating stop_pxc
 #
-echo "if [[ -r $node3/socket.sock ]]; then" >> ./stop_pxc
-echo "  ${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock shutdown" >> ./stop_pxc
-echo "  echo 'Server on socket $node3/socket.sock with datadir ${BUILD}/node3 halted'" >> ./stop_pxc
-echo "fi" >> ./stop_pxc
+echo "echo 'Stopping PXC'" > ./stop_pxc
 echo "if [[ -r $node2/socket.sock ]]; then" >> ./stop_pxc
 echo "  ${BUILD}/bin/mysqladmin -uroot -S$node2/socket.sock shutdown" >> ./stop_pxc
 echo "  echo 'Server on socket $node2/socket.sock with datadir ${BUILD}/node2 halted'" >> ./stop_pxc
@@ -190,19 +146,12 @@ echo "fi" >> ./stop_pxc
 echo "if [ -r ./stop_pxc ]; then ./stop_pxc 2>/dev/null 1>&2; fi" > ./wipe
 echo "if [ -d $BUILD/node1 ]; then rm -rf $BUILD/node1; fi" >> ./wipe
 echo "if [ -d $BUILD/node2 ]; then rm -rf $BUILD/node2; fi" >> ./wipe
-echo "if [ -d $BUILD/node3 ]; then rm -rf $BUILD/node3; fi" >> ./wipe
 
 echo "rm -rf ${keyring_node1}" >> ./wipe
 echo "rm -rf ${keyring_node2}" >> ./wipe
-echo "rm -rf ${keyring_node3}" >> ./wipe
-
-echo "rm -rf ${innodb_tempdir1}" >> ./wipe
-echo "rm -rf ${innodb_tempdir2}" >> ./wipe
-echo "rm -rf ${innodb_tempdir3}" >> ./wipe
 
 echo "rm -rf /tmp/node1" >> ./wipe
 echo "rm -rf /tmp/node2" >> ./wipe
-echo "rm -rf /tmp/node3" >> ./wipe
 
 echo "rm ./init_pxc ./start_pxc ./stop_pxc ./node_cl" >> ./wipe
 
