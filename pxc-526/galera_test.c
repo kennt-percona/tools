@@ -65,14 +65,16 @@ static size_t counter_get(void)
 static int mysql_is_rollback_error(int err)
 {
 	switch (err) {
-		case 1205:
-		case 1206:
-		case 1213:
+		case 1205: /* ER_LOCK_WAIT_TIMEOUT */
+		case 1206: /* ER_LOCK_TABLE_FULL */
+		case 1213: /* ER_LOCK_DEADLOCK */
 		/* NOTE: unclear this error code should have been returned with galera, we
 		         need to treat this as a rollback-able event otherwise we can get
 		         consistency issues */
-		case 1317:
+		case 1317: /* ER_QUERY_INTERRUPTED */
 			return 1;
+		default:
+			fprintf(stderr, "Received additional error : %d", err);
 	}
 	return 0;
 }
