@@ -97,9 +97,9 @@ echo "mkdir -p $node1" >> ./init_pxc
 echo "mkdir -p /tmp/pxc_node " >> ./init_pxc
 
 echo "echo 'Initializing datadirs'" >> ./init_pxc
-echo "if [ \"\$(${BUILD}/bin/mysqld --version \| grep -oe '5\.[567]' \| head -n1)\" == \"5.7\" ]; then" >> ./init_pxc
+echo "if [ \"\$(${BUILD}/bin/mysqld --version | grep -oe '5\.[567]' | head -n1)\" == \"5.7\" ]; then" >> ./init_pxc
 echo "  MID=\"${BUILD}/bin/mysqld --no-defaults --initialize-insecure --basedir=${BUILD}\"" >> ./init_pxc
-echo "elif [ \"\$(${BUILD}/bin/mysqld --version \| grep -oe '5\.[567]' \| head -n1)\" == \"5.6\" ]; then" >> ./init_pxc
+echo "elif [ \"\$(${BUILD}/bin/mysqld --version | grep -oe '5\.[567]' | head -n1)\" == \"5.6\" ]; then" >> ./init_pxc
 echo "  MID=\"${BUILD}/scripts/mysql_install_db --no-defaults --basedir=${BUILD}\"" >> ./init_pxc
 echo "fi" >> ./init_pxc
 
@@ -207,11 +207,6 @@ echo "" >> ./wipe
 # Creating command-line scripts
 #
 echo "#! /bin/bash" > ./node_cl
-echo "" >> ./node_cl
-echo "if (( \"\$#\" != 1 )); then" >> ./node_cl
-echo "  echo \"Usage: node_cl <node_number>\"" >> ./node_cl
-echo "  exit 1" >> ./node_cl
-echo "fi" >> ./node_cl
 echo "" >> ./node_cl
 echo "$BUILD/bin/mysql -A -S$node1/socket.sock -uroot " >> ./node_cl
 
