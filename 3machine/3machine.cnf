@@ -1,0 +1,35 @@
+# Common options
+[mysqld]
+#skip-performance-schema
+innodb-file-per-table
+innodb-autoinc-lock-mode=2
+innodb-locks-unsafe-for-binlog=1
+innodb-flush-method=O_DIRECT
+sql-mode=no_engine_substitution
+secure-file-priv=
+wsrep-slave-threads=2
+log-output=none
+wsrep-sst-method=mysqldump
+wsrep-sst-auth="root:"
+
+
+wsrep-debug=ON
+
+#user=kennt
+binlog-format=ROW
+wsrep-cluster-name=my_cluster
+gtid_mode=ON
+log_slave_updates
+enforce_gtid_consistency=1
+
+datadir=/home/kennt/dev/pxc/build-bin/node_data
+log-error=/home/kennt/dev/pxc/build-bin/node_data/error.log
+socket=/home/kennt/dev/pxc/build-bin/node_data/socket.sock
+
+
+#
+# This needs to be changed on a per-node basis
+#
+server-id=1
+wsrep-node-name=node1
+
