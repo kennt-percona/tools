@@ -15,6 +15,7 @@
 #               start_master
 #               init_pxc
 #               start_pxc
+#               init_channels
 #
 # (afterwards)
 #   Machine 1:  stop_pxc
@@ -34,6 +35,7 @@ if (( "$#" != 2 )); then
   echo "  start_master : Starts up the two async master nodes"
   echo "  init_pxc     : Creates subdirectories and initializes the cluster datadir"
   echo "  start_pxc    : Starts up node 1 (the async slave)"
+  echo "  init_channels: Configures the channels on the PXC node"
   echo "  stop_master  : Stops the async master nodes"
   echo "  stop_pxc     : Stops the cluster"
   echo "  node_cl      : Opens a mysql shell to a node"
@@ -58,6 +60,7 @@ echo "  init_master  : Creates subdirectories and initializes the datadirs"
 echo "  start_master : Starts up the async masters"
 echo "  init_pxc     : Creates subdirectories and initializes the datadirs"
 echo "  start_pxc    : Starts up node 1 (the async slave)"
+echo "  init_channels: Configures the channels on the PXC node"
 echo "  stop_master  : Stops the async master"
 echo "  stop_pxc     : Stops the cluster"
 echo "  node_cl      : Opens a mysql shell to a node"
@@ -118,8 +121,8 @@ echo -e "\n" >> ./init_master
 
 echo "echo 'Setting up the user account on the master'" >> ./init_master
 echo "${BUILD}/bin/mysql -S$nodea/socket.sock -uroot <<EOF" >> ./init_master
-echo "CREATE USER 'repl'@'%' IDENTIFIED BY 'repl';" >> ./init_master
-echo "GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';" >> ./init_master
+echo "CREATE USER IF NOT EXISTS 'repla'@'%' IDENTIFIED BY 'repla';" >> ./init_master
+echo "GRANT REPLICATION SLAVE ON *.* TO 'repla'@'%';" >> ./init_master
 echo "EOF" >> ./init_master
 echo -e "\n" >> ./init_master
 
@@ -145,8 +148,8 @@ echo -e "\n" >> ./init_master
 
 echo "echo 'Setting up the user account on the master'" >> ./init_master
 echo "${BUILD}/bin/mysql -S$nodeb/socket.sock -uroot <<EOF" >> ./init_master
-echo "CREATE USER 'repl'@'%' IDENTIFIED BY 'repl';" >> ./init_master
-echo "GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';" >> ./init_master
+echo "CREATE USER IF NOT EXISTS 'replb'@'%' IDENTIFIED BY 'replb';" >> ./init_master
+echo "GRANT REPLICATION SLAVE ON *.* TO 'replb'@'%';" >> ./init_master
 echo "EOF" >> ./init_master
 echo -e "\n" >> ./init_master
 
@@ -272,8 +275,8 @@ echo -e "\n" >> ./start_pxc
 #
 echo "echo 'Setting up the channels'" > ./init_channels
 echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./init_channels
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEA, MASTER_USER='repl', MASTER_PASSWORD='repl', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-a';" >> ./init_channels
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEB, MASTER_USER='repl', MASTER_PASSWORD='repl', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-b';" >> ./init_channels
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEA, MASTER_USER='repla', MASTER_PASSWORD='repla', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-a';" >> ./init_channels
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEB, MASTER_USER='replb', MASTER_PASSWORD='replb', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-b';" >> ./init_channels
 echo "EOF" >> ./init_channels
 echo -e "\n" >> ./init_channels
 
