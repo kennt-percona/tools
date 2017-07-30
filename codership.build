@@ -1,0 +1,5 @@
+cd build
+cmake -DWITH_WSREP=ON -DWITH_INNODB_DISALLOW_WRITES=ON -DCMAKE_INSTALL_PREFIX=./usr ..
+make
+make install
+
