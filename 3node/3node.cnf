@@ -12,7 +12,7 @@ wsrep_sst_method=xtrabackup-v2
 wsrep_sst_auth="root:"
 innodb_autoinc_lock_mode=2
 innodb_locks_unsafe_for_binlog=1
-wsrep-debug=1
+#wsrep-debug=1
 
 [sst]
 #encrypt=3
@@ -22,13 +22,14 @@ wsrep-debug=1
 #encrypt=1
 #encrypt-algo=AES256
 #encrypt-key=A1EDC73815467C083B0869508406637E
+wsrep-debug=1
 
 [mysqld.1]
 server-id=1
 datadir=/home/kennt/dev/pxc/build-bin/node1
-log-error=/home/kennt/dev/pxc/build-bin/node1/node1.err
-innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir1
-innodb-log-group-home-dir=/tmp/node1
+log-error=/home/kennt/dev/pxc/build-bin/node1/error.log
+#innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir1
+#innodb-log-group-home-dir=/tmp/node1
 wsrep-node-name=node1
 socket=/home/kennt/dev/pxc/build-bin/node1/socket.sock
 #early-plugin-load=keyring_file.so
@@ -37,9 +38,9 @@ socket=/home/kennt/dev/pxc/build-bin/node1/socket.sock
 [mysqld.2]
 server-id=2
 datadir=/home/kennt/dev/pxc/build-bin/node2
-log-error=/home/kennt/dev/pxc/build-bin/node2/node2.err
-innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir2
-innodb-log-group-home-dir=/tmp/node2
+log-error=/home/kennt/dev/pxc/build-bin/node2/error.log
+#innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir2
+#innodb-log-group-home-dir=/tmp/node2
 wsrep-node-name=node2
 socket=/home/kennt/dev/pxc/build-bin/node2/socket.sock
 #early-plugin-load=keyring_file.so
@@ -48,9 +49,9 @@ socket=/home/kennt/dev/pxc/build-bin/node2/socket.sock
 [mysqld.3]
 server-id=3
 datadir=/home/kennt/dev/pxc/build-bin/node3
-log-error=/home/kennt/dev/pxc/build-bin/node3/node3.err
-innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir3
-innodb-log-group-home-dir=/tmp/node3
+log-error=/home/kennt/dev/pxc/build-bin/node3/error.log
+#innodb-tmpdir=/home/kennt/dev/pxc/build-bin/innodb_tmpdir3
+#innodb-log-group-home-dir=/tmp/node3
 wsrep-node-name=node3
 socket=/home/kennt/dev/pxc/build-bin/node3/socket.sock
 #early-plugin-load=keyring_file.so
