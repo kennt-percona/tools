@@ -22,9 +22,9 @@ gtid_mode=ON
 log_slave_updates
 enforce_gtid_consistency=1
 
-datadir=/home/kennt/dev/pxc/build-bin/node_data
-log-error=/home/kennt/dev/pxc/build-bin/node_data/error.log
-socket=/home/kennt/dev/pxc/build-bin/node_data/socket.sock
+datadir=/home/kennt/dev/pxc/build-bin/data
+log-error=/home/kennt/dev/pxc/build-bin/data/error.log
+socket=/home/kennt/dev/pxc/build-bin/data/socket.sock
 
 
 #

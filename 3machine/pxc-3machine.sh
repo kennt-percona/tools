@@ -87,7 +87,7 @@ echo ""
 
 CLUSTER_ADDRESS="$my_ipaddr,$cluster_ipaddr"
 
-node1="${BUILD}/node_data"
+node1="${BUILD}/data"
 
 #
 # Create the init_pxc1 script 
@@ -132,7 +132,7 @@ echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc_bo
 #echo "    --wsrep_sst_receive_address=$RADDR1 \\" >> ./start_pxc_bootstrap
 #echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc_bootstrap
 #echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR1;gmcast.segment=1\" \\" >> ./start_pxc_bootstrap
-echo "    --wsrep-new-cluster  > $node1/node.err 2>&1 &" >> ./start_pxc_bootstrap
+echo "    --wsrep-new-cluster  > $node1/error.log 2>&1 &" >> ./start_pxc_bootstrap
 
 echo -e "\n" >> ./start_pxc_bootstrap
 
@@ -165,7 +165,7 @@ echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc
 #echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc
 #echo "    --wsrep_node_incoming_address=$ipaddr1 \\" >> ./start_pxc
 #echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc
-echo "    > $node1/node.err 2>&1 &" >> ./start_pxc
+echo "    > $node1/error.log 2>&1 &" >> ./start_pxc
 
 echo -e "\n" >> ./start_pxc
 
