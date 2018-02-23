@@ -89,7 +89,10 @@ node2="${BUILD}/node2"
 #
 # Create the init_master script 
 #
-echo "echo 'Creating subdirectores'" > ./init_master
+echo "" > ./init_master
+echo "PXC_START_TIMEOUT=30" >> ./init_master
+echo "" >> ./init_master
+echo "echo 'Creating subdirectores'" >> ./init_master
 echo "mkdir -p $nodem" >> ./init_master
 echo "mkdir -p /tmp/nodem" >> ./init_master
 
