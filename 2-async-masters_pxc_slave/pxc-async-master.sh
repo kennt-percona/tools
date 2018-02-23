@@ -84,6 +84,10 @@ nodeb="${BUILD}/nodeb"
 node1="${BUILD}/node1"
 
 
+# This defines the replication users for the two master nodes
+MASTER_USER_A='repla'
+MASTER_USER_B='replb'
+
 #
 # Create the init_master script 
 #
@@ -121,8 +125,8 @@ echo -e "\n" >> ./init_master
 
 echo "echo 'Setting up the user account on the master'" >> ./init_master
 echo "${BUILD}/bin/mysql -S$nodea/socket.sock -uroot <<EOF" >> ./init_master
-echo "CREATE USER IF NOT EXISTS 'repla'@'%' IDENTIFIED BY 'repla';" >> ./init_master
-echo "GRANT REPLICATION SLAVE ON *.* TO 'repla'@'%';" >> ./init_master
+echo "CREATE USER IF NOT EXISTS '${MASTER_USER_A}'@'%' IDENTIFIED BY '${MASTER_USER_A}';" >> ./init_master
+echo "GRANT REPLICATION SLAVE ON *.* TO '${MASTER_USER_A}'@'%';" >> ./init_master
 echo "EOF" >> ./init_master
 echo -e "\n" >> ./init_master
 
@@ -148,8 +152,8 @@ echo -e "\n" >> ./init_master
 
 echo "echo 'Setting up the user account on the master'" >> ./init_master
 echo "${BUILD}/bin/mysql -S$nodeb/socket.sock -uroot <<EOF" >> ./init_master
-echo "CREATE USER IF NOT EXISTS 'replb'@'%' IDENTIFIED BY 'replb';" >> ./init_master
-echo "GRANT REPLICATION SLAVE ON *.* TO 'replb'@'%';" >> ./init_master
+echo "CREATE USER IF NOT EXISTS '${MASTER_USER_B}'@'%' IDENTIFIED BY '${MASTER_USER_B}';" >> ./init_master
+echo "GRANT REPLICATION SLAVE ON *.* TO '${MASTER_USER_B}'@'%';" >> ./init_master
 echo "EOF" >> ./init_master
 echo -e "\n" >> ./init_master
 
@@ -275,8 +279,8 @@ echo -e "\n" >> ./start_pxc
 #
 echo "echo 'Setting up the channels'" > ./init_channels
 echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./init_channels
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEA, MASTER_USER='repla', MASTER_PASSWORD='repla', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-a';" >> ./init_channels
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEB, MASTER_USER='replb', MASTER_PASSWORD='replb', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-b';" >> ./init_channels
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEA, MASTER_USER='${MASTER_USER_A}', MASTER_PASSWORD='${MASTER_USER_A}', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-a';" >> ./init_channels
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEB, MASTER_USER='${MASTER_USER_B}', MASTER_PASSWORD='${MASTER_USER_B}', MASTER_AUTO_POSITION=1 FOR CHANNEL 'master-b';" >> ./init_channels
 echo "EOF" >> ./init_channels
 echo -e "\n" >> ./init_channels
 

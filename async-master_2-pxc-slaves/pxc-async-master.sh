@@ -275,12 +275,8 @@ echo -e "\n" >> ./start_pxc2
 # Starting node 2 (with gdb)
 #
 echo "PXC_MYEXTRA=\"\"" > ./start_pxc2_gdb
-echo "PXC_START_TIMEOUT=30"  >> ./start_pxc2_gdb
-echo -e "\n" >> ./start_pxc2_gdb
-echo "echo 'Starting PXC nodes..'" >> ./start_pxc2_gdb
 echo -e "\n" >> ./start_pxc2_gdb
 
-echo "echo 'Starting node 2..'" >> ./start_pxc2_gdb
 echo "gdb --args ${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2_gdb
 echo "    --port=$RBASE2 --gdb \\" >> ./start_pxc2_gdb
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2_gdb
@@ -288,8 +284,7 @@ echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2_gdb
 echo "    --wsrep_cluster_address=gcomm://$CLUSTER_ADDRESS \\" >> ./start_pxc2_gdb
 echo "    --wsrep_sst_receive_address=$RADDR2 \\" >> ./start_pxc2_gdb
 echo "    --wsrep_node_incoming_address=$ipaddr \\" >> ./start_pxc2_gdb
-echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\" \\" >> ./start_pxc2_gdb
-echo "    > $node2/node2.err 2>&1 &" >> ./start_pxc2_gdb
+echo "    --wsrep_provider_options=\"$evs_options;gmcast.listen_addr=tcp://$LADDR2;gmcast.segment=1\"" >> ./start_pxc2_gdb
 
 
 #
