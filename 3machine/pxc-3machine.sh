@@ -186,7 +186,7 @@ echo -e "\n" >> ./start_pxc
 echo "" > ./stop_pxc
 echo "if [[ -r $node1/socket.sock ]]; then" >> ./stop_pxc
 echo "  ${BUILD}/bin/mysqladmin -uroot -S$node1/socket.sock shutdown" >> ./stop_pxc
-echo "  echo 'Server on socket $node1/socket.sock with datadir ${BUILD}/node1 halted'" >> ./stop_pxc
+echo "  echo 'Server on socket $node1/socket.sock with datadir node1 halted'" >> ./stop_pxc
 echo "fi" >> ./stop_pxc
 echo  "" >> ./stop_pxc
 
