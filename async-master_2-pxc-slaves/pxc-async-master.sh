@@ -13,8 +13,10 @@
 #
 # Procedure:
 #   Machine 1:  init_master
+#               init_master_repl
 #               start_master
 #               init_pxc
+#               init_slave_repl
 #               start_pxc1
 #               start_pxc2
 #
@@ -33,8 +35,10 @@ if (( "$#" != 2 )); then
   echo ""
   echo "Creates the following scripts:"
   echo "  init_master  : Creates subdirectories and initializes the master datadir"
+  echo "  init_master_repl : Initializes the replication configuration on the master"
   echo "  start_master : Starts up the async master node"
   echo "  init_pxc     : Creates subdirectories and initializes the cluster datadir"
+  echo "  init_slave_repl : Initializes the replication configuration on the slave"
   echo "  start_pxc1   : Starts up node 1 (the async slave)"
   echo "  start_pxc2   : Starts up node 2"
   echo "  stop_master  : Stops the async master node"
@@ -58,8 +62,10 @@ fi
 echo ""
 echo "Adding scripts:"
 echo "  init_master  : Creates subdirectories and initializes the datadirs"
+echo "  init_master_repl : Initializes the replication config on the master"
 echo "  start_master : Starts up the async master"
 echo "  init_pxc     : Creates subdirectories and initializes the datadirs"
+echo "  init_slave_repl : Initializes the replication config on the slave"
 echo "  start_pxc1   : Starts up node 1 (the async slave)"
 echo "  start_pxc2   : Starts up node 2"
 echo "  stop_master  : Stops the async master"
@@ -109,30 +115,16 @@ echo "\${MID} --datadir=$nodem  > ${BUILD}/startup_nodem.err 2>&1 || exit 1;" >>
 
 echo -e "\n" >> ./init_master
 
-echo "echo 'Starting up async master to create users'" >> ./init_master
-echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.m \\" >> ./init_master
-echo "    --port=$RBASEM \\" >> ./init_master
-echo "    --basedir=${BUILD} \$PXC_MYEXTRA > $nodem/nodem.err 2>&1 &" >> ./init_master
-echo -e "\n" >> ./init_master
-echo "sleep 2" >> ./init_master
-echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./init_master
-echo "  sleep 1" >> ./init_master
-echo "  if ${BUILD}/bin/mysqladmin -uroot -S$nodem/socket.sock ping > /dev/null 2>&1; then" >> ./init_master
-echo "    break" >> ./init_master
-echo "  fi" >> ./init_master
-echo "done" >> ./init_master
-echo -e "\n" >> ./init_master
-
-echo "echo 'Setting up the user account on the master'" >> ./init_master
-echo "${BUILD}/bin/mysql -S$nodem/socket.sock -uroot <<EOF" >> ./init_master
-echo "CREATE USER 'repl'@'%' IDENTIFIED BY 'repl';" >> ./init_master
-echo "GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';" >> ./init_master
-echo "EOF" >> ./init_master
-echo -e "\n" >> ./init_master
-
-echo "echo 'Shutting down the async master'" >> ./init_master
-echo "${BUILD}/bin/mysqladmin -uroot -S$nodem/socket.sock shutdown" >> ./init_master
-echo -e "\n" >> ./init_master
+#
+# Configure the master for replication
+#
+echo "" > ./init_master_repl
+echo "echo 'Setting up the user account on the master'" >> ./init_master_repl
+echo "${BUILD}/bin/mysql -S$nodem/socket.sock -uroot <<EOF" >> ./init_master_repl
+echo "CREATE USER 'repl'@'%' IDENTIFIED BY 'repl';" >> ./init_master_repl
+echo "GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';" >> ./init_master_repl
+echo "EOF" >> ./init_master_repl
+echo -e "\n" >> ./init_master_repl
 
 
 #
@@ -226,20 +218,18 @@ echo "done" >> ./start_pxc1
 
 echo -e "\n" >> ./start_pxc1
 
-echo "echo 'Setting up the user account on the slave'" >> ./start_pxc1
-echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc1
-echo "STOP SLAVE;" >> ./start_pxc1
-echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEM, MASTER_USER='repl', MASTER_PASSWORD='repl';" >> ./start_pxc1
-echo "EOF" >> ./start_pxc1
 
-echo -e "\n" >> ./start_pxc1
+#
+# Configure the slave (node 1) for replication
+#
+echo "" > ./init_slave_repl
+echo "echo 'Setting up the user account on the slave'" >> ./init_slave_repl
+echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./init_slave_repl
+echo "STOP SLAVE;" >> ./init_slave_repl
+echo "CHANGE MASTER TO MASTER_HOST='$ipaddr', MASTER_PORT=$RBASEM, MASTER_USER='repl', MASTER_PASSWORD='repl';" >> ./init_slave_repl
+echo "EOF" >> ./init_slave_repl
 
-#echo "echo 'Starting async replication on node 1'" >> ./start_pxc1
-#echo "${BUILD}/bin/mysql -S$node1/socket.sock -uroot <<EOF" >> ./start_pxc1
-#echo "START SLAVE;" >> ./start_pxc1
-#echo "SHOW SLAVE STATUS;" >> ./start_pxc1
-#echo "EOF" >> ./start_pxc1
-#echo -e "\n" >> ./start_pxc1
+echo -e "\n" >> ./init_slave_repl
 
 
 #
@@ -340,6 +330,7 @@ echo "rm -rf /tmp/nodem" >> ./wipe
 
 echo "rm ./init_master ./init_pxc ./start_master ./start_pxc1 ./start_pxc2 ./start_pxc2_gdb" >> ./wipe
 echo "rm ./stop_master ./stop_pxc ./stop_pxc2 ./node_cl " >> ./wipe
+echo "rm ./init_master_repl ./init_slave_repl " >> ./wipe
 echo "" >> ./wipe
 
 #
@@ -355,5 +346,5 @@ echo "" >> ./node_cl
 echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
 chmod +x ./init_master ./init_pxc ./start_master ./start_pxc1 ./start_pxc2 ./start_pxc2_gdb
-chmod +x ./stop_master ./stop_pxc ./stop_pxc2 ./node_cl ./wipe
+chmod +x ./stop_master ./stop_pxc ./stop_pxc2 ./node_cl ./wipe ./init_master_repl ./init_slave_repl
 
