@@ -1,0 +1,3 @@
+vault_url = http://127.0.0.1:8200
+secret_mount_point = pxc_node1
+token = 222a6900-bd45-32ae-7cd3-eb455fe56136
