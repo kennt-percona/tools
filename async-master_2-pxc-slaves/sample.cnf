@@ -16,7 +16,7 @@ wsrep-sst-auth="root:"
 
 gtid-mode=ON
 enforce-gtid-consistency=1
-
+log-slave-updates
 
 wsrep-debug=ON
 

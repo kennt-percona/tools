@@ -22,7 +22,6 @@ ipaddr="${2}"
 
 echo "Adding scripts: ./init_pxc | ./start_pxc | ./start_pxc1 | ./start_pxc2 | ./start_pxc3 | ./ stop_pxc | ./node_cl | ./wipe"
 
-
 ADDR=$ipaddr
 PORT_BASE1=4100
 GAL_PORT1=$(( PORT_BASE1 + 30 ))
@@ -55,7 +54,6 @@ keyring_node3="${BUILD}/keyring-node3"
 #innodb_tempdir2="${BUILD}/innodb_tempdir2"
 #innodb_tempdir3="${BUILD}/innodb_tempdir3"
 
-
 #
 # Create the init_pxc script 
 #
@@ -79,7 +77,6 @@ echo "\${MID} --datadir=$node2  > ${BUILD}/startup_node2.err 2>&1 || exit 1;" >>
 echo "\${MID} --datadir=$node3  > ${BUILD}/startup_node3.err 2>&1 || exit 1;" >> ./init_pxc
 
 echo -e "\n" >> ./init_pxc
-
 
 #
 # Creating start_pxc
@@ -224,7 +221,6 @@ echo "rm -rf ${keyring_node3}" >> ./wipe
 #echo "rm -rf /tmp/node3" >> ./wipe
 
 echo "rm ./init_pxc ./start_pxc ./start_pxc1 ./start_pxc2 ./start_pxc3 ./stop_pxc ./node_cl" >> ./wipe
-
 
 #
 # Creating command-line scripts

@@ -64,8 +64,8 @@ echo -e "\n" >> ./init_pxc
 #
 echo "echo 'Starting PXC nodes..'" >> ./start_pxc
 echo -e "\n" >> ./start_pxc
-echo "./start_pxc1\n" >> ./start_pxc
-echo "./start_pxc2\n" >> ./start_pxc
+echo "./start_pxc1" >> ./start_pxc
+echo "./start_pxc2" >> ./start_pxc
 
 #
 # Starting node 1
@@ -149,8 +149,8 @@ echo "fi" >> ./stop_pxc
 # Creating init_memcached
 #
 echo "echo 'Initializing memcached on node 1'" > ./init_memcached
-echo "${BUILD}/bin/mysql -uroot -S$node1/socket.sock -e 'install plugin daemon_memcached soname \"libmemcached.so\";'" >> ./init_memcached
 echo "${BUILD}/bin/mysql -uroot -S$node1/socket.sock < ${BUILD}/share/innodb_memcached_config.sql" >> ./init_memcached
+echo "${BUILD}/bin/mysql -uroot -S$node1/socket.sock -e 'install plugin daemon_memcached soname \"libmemcached.so\";'" >> ./init_memcached
 
 
 #
