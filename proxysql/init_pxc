@@ -1,0 +1,46 @@
+#!/bin/bash -ue
+
+
+echo 'Creating subdirectores'
+rm -rf /home/kennt/dev/pxc/node11 /home/kennt/dev/pxc/node12 /home/kennt/dev/pxc/node13 /home/kennt/dev/pxc/node21 /home/kennt/dev/pxc/node22 /home/kennt/dev/pxc/node23
+mkdir -p /home/kennt/dev/pxc/node11 /home/kennt/dev/pxc/node12 /home/kennt/dev/pxc/node13 /home/kennt/dev/pxc/node21 /home/kennt/dev/pxc/node22 /home/kennt/dev/pxc/node23
+mkdir -p /home/kennt/dev/pxc/logs
+
+
+pushd /home/kennt/dev/pxc > /dev/null
+PXC_BASEDIR=$(ls -1td ?ercona-?tra??-?luster* | grep -v '.tar' | head -n1)
+popd > /dev/null
+if [[ -z $PXC_BASEDIR ]]; then
+    echo Error! Cannot find the PXC basedir!
+    exit 1
+fi
+
+
+echo Initializing datadirs...
+MYSQLD_VERSION=$(${PXC_BASEDIR}/bin/mysqld --version)
+if [ "$(echo $MYSQLD_VERSION | grep -oe '5\.[567]' | head -n1)" == "5.7" ]; then
+  MID="${PXC_BASEDIR}/bin/mysqld --no-defaults --initialize-insecure --innodb_log_checksums=ON --basedir=${PXC_BASEDIR}"
+elif [ "$(echo $MYSQLD_VERSION  | grep -oe '5\.[567]' | head -n1)" == "5.6" ]; then
+  MID="${PXC_BASEDIR}/scripts/mysql_install_db --no-defaults --basedir=${PXC_BASEDIR}"
+else
+    echo Unexpected mysqld version: $MYSQLD_VERSION
+    exit 1
+fi
+
+
+echo Initializing node11...
+${MID} --datadir=/home/kennt/dev/pxc/node11  > /home/kennt/dev/pxc/logs/node11.err 2>&1 || exit 1;
+echo Initializing node12...
+${MID} --datadir=/home/kennt/dev/pxc/node12  > /home/kennt/dev/pxc/logs/node12.err 2>&1 || exit 1;
+echo Initializing node13...
+${MID} --datadir=/home/kennt/dev/pxc/node13  > /home/kennt/dev/pxc/logs/node13.err 2>&1 || exit 1;
+
+
+echo Initializing node21...
+${MID} --datadir=/home/kennt/dev/pxc/node21  > /home/kennt/dev/pxc/logs/node21.err 2>&1 || exit 1;
+echo Initializing node22...
+${MID} --datadir=/home/kennt/dev/pxc/node22  > /home/kennt/dev/pxc/logs/node22.err 2>&1 || exit 1;
+echo Initializing node23...
+${MID} --datadir=/home/kennt/dev/pxc/node23  > /home/kennt/dev/pxc/logs/node23.err 2>&1 || exit 1;
+
+

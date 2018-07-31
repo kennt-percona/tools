@@ -1,0 +1,48 @@
+#!/bin/bash -ue
+
+
+echo Removing existing PXC install
+pushd /home/kennt/dev/pxc >> /dev/null
+find . -maxdepth 1 -type d -name 'Percona-XtraDB-Cluster-5.*' -exec rm -rf {} \+
+
+echo Installing PXC...
+PXC_TAR=$(ls -1td ?ercona-?tra??-?luster* | grep '.tar' | head -n1)
+if [[ ! -z $PXC_TAR ]];then
+    echo Extracting PXC...
+    tar -xzf $PXC_TAR
+    PXC_BASEDIR=$(ls -1td ?ercona-?tra??-?luster* | grep -v '.tar' | head -n1)
+    if [[ -z $PXC_BASEDIR ]]; then
+        echo ERROR! Cannot find the Percona-XtraDB-Cluster installation directory. Terminating!
+        popd >> /dev/null
+        exit 1
+    fi
+else
+    echo ERROR! Percona-XtraDB-Cluster binary tarball does not exist. Terminating
+    popd >> /dev/null
+    exit 1
+fi
+
+
+if [[ ! -e $(which $PXC_BASEDIR/bin/mysql 2> /dev/null) ]] ;then
+  echo ERROR! Cannot find mysql in '$PXC_BASEDIR/bin/'.  Please check the PXC tarball. Terminating!
+  popd >> /dev/null
+  exit 1
+fi
+
+
+echo Setting up proxysql
+PROXYSQL_BASE=$(ls -1td proxysql-1* | grep -v '.tar' | head -n1)
+if [[ -z $PROXYSQL_BASE ]]; then
+  echo ERROR! Cannot find the proxysql installation directory. Terminating!
+  popd >> /dev/null
+  exit 1
+fi
+
+
+PROXYSQL_BASE="/home/kennt/dev/pxc/$PROXYSQL_BASE"
+if [[ ! $PATH =~ $PROXYSQL_BASE/usr/bin ]]; then
+    export PATH="$PROXYSQL_BASE/usr/bin/:$PATH"
+fi
+popd >> /dev/null
+
+
