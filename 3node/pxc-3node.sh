@@ -1,6 +1,9 @@
 #!/bin/bash
 # Created by Ramesh Sivaraman, Percona LLC
 
+. $(dirname $0)/../include/tools_common.sh
+
+
 # check for config file parameter
 if (( "$#" != 2 )); then
   echo "Usage:  pxc-config-file <config-file> <ipaddr>"
@@ -10,12 +13,16 @@ if (( "$#" != 2 )); then
   echo "  start_pxc : Starts a 3-node cluster, node 1 is bootstrapped"
   echo "  start_pxc1: Starts node 1 (bootstrapped)"
   echo "  stop_pxc  : Stops the 3-node cluster"
-  echo "  node_cl  : Opens a mysql shell to a node"
+  echo "  node_cl   : Opens a mysql shell to a node"
+  echo "  node_query: Sends a query to a node"
   echo "  wipe      : Stops the cluster, moves datadir to .PREV, removes subdirectories"
   exit 1
 fi
 
 BUILD=$(pwd)
+
+declare mysql_version=$(get_version "${BUILD}/bin/mysqld")
+echo "mysql_version is $mysql_version"
 
 config_file_path="${1}"
 ipaddr="${2}"
@@ -57,18 +64,25 @@ keyring_node3="${BUILD}/keyring-node3"
 #
 # Create the init_pxc script 
 #
-echo "echo 'Creating subdirectores'" > ./init_pxc
+echo "" > ./init_pxc
+echo "echo 'Initializing MySQL $mysql_version'" >> ./init_pxc
+echo "echo 'Creating subdirectores'" >> ./init_pxc
 echo "mkdir -p $node1 $node2 $node3" >> ./init_pxc
 echo "mkdir -p $keyring_node1 $keyring_node2 $keyring_node3" >> ./init_pxc
 #echo "mkdir -p $innodb_tempdir1  $innodb_tempdir2  $innodb_tempdir3" >> ./init_pxc
 #echo "mkdir -p /tmp/node1 /tmp/node2 /tmp/node3 " >> ./init_pxc
 
 echo "echo 'Initializing datadirs'" >> ./init_pxc
-echo "if [ \"$(${BUILD}/bin/mysqld --version | grep -oe '5\.[567]' | head -n1)\" == \"5.7\" ]; then" >> ./init_pxc
-echo "  MID=\"${BUILD}/bin/mysqld --no-defaults --initialize-insecure --innodb_log_checksums=ON --basedir=${BUILD}\"" >> ./init_pxc
-echo "elif [ \"$(${BUILD}/bin/mysqld --version | grep -oe '5\.[567]' | head -n1)\" == \"5.6\" ]; then" >> ./init_pxc
-echo "  MID=\"${BUILD}/scripts/mysql_install_db --no-defaults --basedir=${BUILD}\"" >> ./init_pxc
-echo "fi" >> ./init_pxc
+if [[ $mysql_version =~ ^5.6 ]]; then
+  echo "MID=\"${BUILD}/scripts/mysql_install_db --no-defaults --basedir=${BUILD}\"" >> ./init_pxc
+elif [[ $mysql_version =~ ^5.7 ]]; then
+  echo "MID=\"${BUILD}/bin/mysqld --no-defaults --initialize-insecure --innodb_log_checksums=ON --basedir=${BUILD}\"" >> ./init_pxc
+elif [[ $mysql_version =~ ^8.0 ]]; then
+  echo "MID=\"${BUILD}/bin/mysqld --no-defaults --initialize-insecure --innodb_log_checksums=ON --basedir=${BUILD}\"" >> ./init_pxc
+else
+  echo "Error: Unsupported MySQL version : $mysql_version"
+  exit 1
+fi
 
 echo -e "\n" >> ./init_pxc
 
@@ -81,7 +95,7 @@ echo -e "\n" >> ./init_pxc
 #
 # Creating start_pxc
 #
-echo "echo 'Starting PXC nodes..'" >> ./start_pxc
+echo "echo 'Starting PXC nodes..'" > ./start_pxc
 echo -e "\n" >> ./start_pxc
 echo "./start_pxc1" >> ./start_pxc
 echo "./start_pxc2" >> ./start_pxc
@@ -186,6 +200,7 @@ echo -e "\n\n" >> ./start_pxc3
 #
 # Creating stop_pxc
 #
+echo -e "\n" > ./stop_pxc
 echo "if [[ -r $node3/socket.sock ]]; then" >> ./stop_pxc
 echo "  ${BUILD}/bin/mysqladmin -uroot -S$node3/socket.sock shutdown" >> ./stop_pxc
 echo "  echo 'Server on socket $node3/socket.sock with datadir ${BUILD}/node3 halted'" >> ./stop_pxc
@@ -220,7 +235,7 @@ echo "rm -rf ${keyring_node3}" >> ./wipe
 #echo "rm -rf /tmp/node2" >> ./wipe
 #echo "rm -rf /tmp/node3" >> ./wipe
 
-echo "rm ./init_pxc ./start_pxc ./start_pxc1 ./start_pxc2 ./start_pxc3 ./stop_pxc ./node_cl" >> ./wipe
+echo "rm ./init_pxc ./start_pxc ./start_pxc1 ./start_pxc2 ./start_pxc3 ./stop_pxc ./node_cl ./node_query" >> ./wipe
 
 #
 # Creating command-line scripts
@@ -234,6 +249,18 @@ echo "fi" >> ./node_cl
 echo "" >> ./node_cl
 echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot " >> ./node_cl
 
+#
+# Creating command-line scripts
+#
+echo "#! /bin/bash" > ./node_query
+echo "" >> ./node_query
+echo "if (( \"\$#\" != 2 )); then" >> ./node_query
+echo "  echo \"Usage: node_query <node_number> <query>\"" >> ./node_query
+echo "  exit 1" >> ./node_query
+echo "fi" >> ./node_query
+echo "" >> ./node_query
+echo "$BUILD/bin/mysql -A -S$BUILD/node\$1/socket.sock -uroot -e '$2'" >> ./node_query
 
-chmod +x ./init_pxc ./start_pxc ./start_pxc1 ./start_pxc2 ./start_pxc3 ./stop_pxc ./node_cl ./wipe
+
+chmod +x ./init_pxc ./start_pxc ./start_pxc1 ./start_pxc2 ./start_pxc3 ./stop_pxc ./node_cl ./node_query ./wipe
 

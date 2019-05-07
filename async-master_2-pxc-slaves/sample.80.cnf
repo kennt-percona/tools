@@ -11,13 +11,15 @@ secure-file-priv=
 wsrep-slave-threads=2
 log-output=none
 wsrep-sst-method=xtrabackup-v2
-wsrep-sst-auth="root:"
+log-error-verbosity=3
 
 gtid-mode=ON
 enforce-gtid-consistency=1
 log-slave-updates
 
 wsrep-debug=ON
+
+mysqlx=0
 
 #user=kennt
 binlog-format=ROW
