@@ -58,7 +58,11 @@ echo "\${MID} --datadir=$node_datadir  > ${BUILD}/startup_node.err 2>&1 || exit 
 echo -e "\n" >> ./init_pxc
 
 echo "echo 'Replacing NODE_DATADIR with $node_datadir in $config_file_path'" >> ./init_pxc
-echo "sed -i 's/NODE_DATADIR/$node_datadir' \"$config_file_path\"" >> ./init_pxc
+
+# Need to escape any slashes in the datadir (since it will contain a path)
+# This will change '/' to '\/'
+safe_node_datadir=${node_datdir///\//\\/}
+echo "sed -i 's/NODE_DATADIR/$safe_node_datadir/' \"$config_file_path\"" >> ./init_pxc
 
 echo -e "\n" >> ./init_pxc
 
