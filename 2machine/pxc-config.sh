@@ -2,7 +2,9 @@
 # Created by Ramesh Sivaraman, Percona LLC
 
 # check for config file parameter
-if (( "$#" != 2 )); then
+if (( "$#" != 3 )); then
+  echo" Error: incorrect number of arguments"
+  echo ""
   echo "Usage:  pxc-config-file <config-file> <ipaddr1> <ipaddr2>"
   echo ""
   echo "This will create the same config, it is expected"
