@@ -63,8 +63,8 @@ echo "echo 'Replacing NODE_DATADIR with $node_datadir in $config_file_path'" >> 
 
 # Need to escape any slashes in the datadir (since it will contain a path)
 # This will change '/' to '\/'
-safe_node_datadir=${node_datadir//\//\/\\/}
-echo "sed -i 's/NODE_DATADIR/$safe_node_datadir/' \"$config_file_path\"" >> ./init_pxc
+#safe_node_datadir=${node_datadir//\//\/\\/}
+echo "sed -i 's/NODE_DATADIR/${node_datadir//\//\\/}/' \"$config_file_path\"" >> ./init_pxc
 
 echo -e "\n" >> ./init_pxc
 
