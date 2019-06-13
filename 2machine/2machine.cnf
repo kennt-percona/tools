@@ -21,6 +21,12 @@ socket=NODE_DATADIR/socket.sock
 datadir=NODE_DATADIR
 log-error=NODE_DATADIR/node.err
 
+pxc-encrypt-cluster-traffic=ON
+ssl-ca=ca.pem
+ssl-cert=server-cert.pem
+ssl-key=server-key.pem
+
+
 [mysqld.1]
 server-id=1
 wsrep-node-name=node1

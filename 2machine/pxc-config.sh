@@ -59,6 +59,11 @@ echo "\${MID} --datadir=$node_datadir  > ${BUILD}/startup_node.err 2>&1 || exit 
 
 echo -e "\n" >> ./init_pxc
 
+echo "echo 'Copying certs'" >> ./init_pxc
+echo "cp ./certs/*.pem ${node_datadir}/" >> ./init_pxc
+
+echo -e "\n" >> ./init_pxc
+
 echo "echo 'Replacing NODE_DATADIR with $node_datadir in $config_file_path'" >> ./init_pxc
 
 # Need to escape any slashes in the datadir (since it will contain a path)
