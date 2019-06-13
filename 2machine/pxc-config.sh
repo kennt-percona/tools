@@ -84,7 +84,7 @@ echo -e "\n" >> ./start_pxc1
 #
 echo "echo 'Starting node 1..'" >> ./start_pxc1
 
-echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults-group-suffix=.1 \\" >> ./start_pxc1
+echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.1 \\" >> ./start_pxc1
 echo "    --port=$RBASE1 \\" >> ./start_pxc1
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc1
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc1
@@ -121,7 +121,7 @@ echo -e "\n" >> ./start_pxc2
 #
 echo "echo 'Starting node 2..'" >> ./start_pxc2
 
-echo "${BUILD}/bin/mysqld-debug --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2
+echo "${BUILD}/bin/mysqld --defaults-file="${config_file_path}" --defaults-group-suffix=.2 \\" >> ./start_pxc2
 echo "    --port=$RBASE2 \\" >> ./start_pxc2
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./start_pxc2
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./start_pxc2
