@@ -10,68 +10,65 @@ sql-mode=no_engine_substitution
 secure-file-priv=
 wsrep-slave-threads=2
 log-output=none
-wsrep-sst-method=xtrabackup-v2
 log-error-verbosity=3
 
 gtid-mode=ON
 enforce-gtid-consistency=1
 log-slave-updates
 
-wsrep-debug=ON
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
 
 mysqlx=0
 
-#user=kennt
 binlog-format=ROW
-wsrep-cluster-name=my_cluster
 
-[mysqld.m]
+wsrep-debug=ON
+wsrep-cluster-name=my_cluster
+wsrep-sst-method=xtrabackup-v2
+
+
+
+[mysqld.master1]
 # Async Master settings
 log-bin=binlog
-#expire_log_days=7
 server-id=100
 
-datadir=/home/kennt/dev/pxc/build-bin/nodem
-log-error=/home/kennt/dev/pxc/build-bin/nodem/error.log
-socket=/home/kennt/dev/pxc/build-bin/nodem/socket.sock
+datadir=DATADIR_BASE_PATH/master1
+log-error=DATADIR_BASE_PATH/master1/error.log
+socket=DATADIR_BASE_PATH/master1/socket.sock
 
-[mysqld.1]
+
+[mysqld.node1]
 # Async slave settings
 log-slave-updates=1
 log-bin=binlog
-#expire-log-days=7
 server-id=1
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 
-datadir=/home/kennt/dev/pxc/build-bin/node1
-log-error=/home/kennt/dev/pxc/build-bin/node1/error.log
+datadir=DATADIR_BASE_PATH/node1
+log-error=DATADIR_BASE_PATH/node1/error.log
 wsrep-node-name=node1
-socket=/home/kennt/dev/pxc/build-bin/node1/socket.sock
+socket=DATADIR_BASE_PATH/node1/socket.sock
 
-slave-parallel-workers=1
 
-[mysqld.2]
+[mysqld.node2]
 log-slave-updates=1
 log-bin=binlog
 server-id=2
-datadir=/home/kennt/dev/pxc/build-bin/node2
-log-error=/home/kennt/dev/pxc/build-bin/node2/error.log
+
+datadir=DATADIR_BASE_PATH/node2
+log-error=DATADIR_BASE_PATH/node2/error.log
 wsrep-node-name=node2
-socket=/home/kennt/dev/pxc/build-bin/node2/socket.sock
+socket=DATADIR_BASE_PATH/node2/socket.sock
 
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 
-[mysqld.3]
+[mysqld.node3]
 log-slave-updates=1
 log-bin=binlog
 server-id=3
-datadir=/home/kennt/dev/pxc/build-bin/node3
-log-error=/home/kennt/dev/pxc/build-bin/node3/error.log
+datadir=DATADIR_BASE_PATH/node3
+log-error=DATADIR_BASE_PATH/node3/error.log
 wsrep-node-name=node3
-socket=/home/kennt/dev/pxc/build-bin/node3/socket.sock
+socket=DATADIR_BASE_PATH/node3/socket.sock
 
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 

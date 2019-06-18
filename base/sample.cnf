@@ -8,68 +8,94 @@ innodb-flush-method=O_DIRECT
 innodb_flush_log_at_trx_commit=2
 sql-mode=no_engine_substitution
 secure-file-priv=
-wsrep-slave-threads=2
 log-output=none
-wsrep-sst-method=xtrabackup-v2
-wsrep-sst-auth="root:"
 
 gtid-mode=ON
 enforce-gtid-consistency=1
+
 log-slave-updates
 
-wsrep-debug=ON
-
-#user=kennt
 binlog-format=ROW
-wsrep-cluster-name=my_cluster
 
-[mysqld.master1]
+wsrep-slave-threads=2
+wsrep-cluster-name=my_cluster
+wsrep-debug=ON
+wsrep-sst-method=xtrabackup-v2
+wsrep-sst-auth="root:"
+
+master-info-repository=TABLE
+relay-log-info-repository=TABLE
+
+
+#
 # Async Master settings
+# (Master1)
+#
+[mysqld.master1]
 log-bin=binlog
-#expire_log_days=7
 server-id=100
 
 datadir=DATADIR_BASE_PATH/master1
 log-error=DATADIR_BASE_PATH/master1/error.log
 socket=DATADIR_BASE_PATH/master1/socket.sock
 
+#
+# Async Master settings
+# (Master2)
+#
+[mysqld.master2]
+log-bin=binlog
+server-id=200
+
+datadir=DATADIR_BASE_PATH/master2
+log-error=DATADIR_BASE_PATH/master2/error.log
+socket=DATADIR_BASE_PATH/master2/socket.sock
+
+
+
+#
+# PXC Cluster settings
+# (PXC1)
+#
 [mysqld.node1]
 # Async slave settings
 log-slave-updates=1
 log-bin=binlog
-#expire-log-days=7
 server-id=1
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 
 datadir=DATADIR_BASE_PATH/node1
 log-error=DATADIR_BASE_PATH/node1/error.log
 wsrep-node-name=node1
 socket=DATADIR_BASE_PATH/node1/socket.sock
 
-slave-parallel-workers=1
 
+#
+# PXC Cluster settings
+# (PXC2)
+#
 [mysqld.node2]
 log-slave-updates=1
 log-bin=binlog
 server-id=2
+
 datadir=DATADIR_BASE_PATH/node2
 log-error=DATADIR_BASE_PATH/node2/error.log
 wsrep-node-name=node2
 socket=DATADIR_BASE_PATH/node2/socket.sock
 
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 
+
+#
+# PXC Cluster settings
+# (PXC3)
+#
 [mysqld.node3]
 log-slave-updates=1
 log-bin=binlog
 server-id=3
+
 datadir=DATADIR_BASE_PATH/node3
 log-error=DATADIR_BASE_PATH/node3/error.log
 wsrep-node-name=node3
 socket=DATADIR_BASE_PATH/node3/socket.sock
-
-master-info-repository=TABLE
-relay-log-info-repository=TABLE
 
