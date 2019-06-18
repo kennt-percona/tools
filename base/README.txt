@@ -1,0 +1,1 @@
+This directory contains the commands to setup PXC and standalone nodes.
