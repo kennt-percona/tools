@@ -35,10 +35,14 @@ declare     IPADDR="${3}"
 declare     BASE_PORT=${4}
 
 declare -i  RBASE=${BASE_PORT}
+
 # Listen address
-declare     LADDR="$IPADDR:$(( RBASE + 30 ))"
+declare -i  LPORT=$(( RBASE + 30 ))
+declare     LADDR="$IPADDR:$LPORT"
+
 # Receive address
-declare     RADDR="$IPADDR:$(( RBASE + 20 ))"
+declare -i  RPORT=$(( RBASE + 20 ))
+declare     RADDR="$IPADDR:$RPORT"
 
 declare     DATADIR_BASE_PATH="${BUILD}"
 declare     NODE_DATADIR="${DATADIR_BASE_PATH}/${NODE_NAME}"
@@ -80,9 +84,10 @@ echo "Node name     : ${NODE_NAME}" >> ./${INFO_SCRIPT_NAME}
 echo "MySQL version : ${mysql_version}" >> ./${INFO_SCRIPT_NAME}
 echo "Datadir       : ${NODE_DATADIR}" >> ./${INFO_SCRIPT_NAME}
 echo "Socket        : ${NODE_DATADIR}/socket.sock}" >> ./${INFO_SCRIPT_NAME}
+echo "IP address    : ${IPADDR}"
 echo "Client port   : ${RBASE}" >> ./${INFO_SCRIPT_NAME}
-echo "Galera address: ${LADDR}" >> ./${INFO_SCRIPT_NAME}
-echo "SST address   : ${RADDR}" >> ./${INFO_SCRIPT_NAME}
+echo "Galera port   : ${LPORT}" >> ./${INFO_SCRIPT_NAME}
+echo "SST port      : ${RPORT}" >> ./${INFO_SCRIPT_NAME}
 
 
 #
