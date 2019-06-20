@@ -182,7 +182,7 @@ echo -e "\n" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 
 echo "echo 'Starting $NODE_NAME..'" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 
-echo "${BUILD}/bin/mysqld --defaults-file="${CONFIG_FILE_PATH}" --defaults-group-suffix=.2 \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "${BUILD}/bin/mysqld --defaults-file="${CONFIG_FILE_PATH}" --defaults-group-suffix=.$NODE_NAME \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "    --port=$RBASE \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "    --basedir=${BUILD} \$PXC_MYEXTRA \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "    --wsrep-provider=${BUILD}/lib/libgalera_smm.so \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
