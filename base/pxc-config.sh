@@ -136,7 +136,7 @@ echo -e "\n" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "  sleep 1" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "  if ! ps --pid \$mysqld_pid >/dev/null; then" >> ./$NEW_CLUSTER_SCRIPT_NAME
-echo "    echo 'Process mysqld (\$mysqld_pid) failed to start'" >> ./$NEW_CLUSTER_SCRIPT_NAME
+echo "    echo \"Process mysqld (\$mysqld_pid) failed to start\"" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "    exit 1" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "  fi" >> ./$NEW_CLUSTER_SCRIPT_NAME
 echo "  if ${BUILD}/bin/mysqladmin -uroot -S$NODE_DATADIR/socket.sock ping > /dev/null 2>&1; then" >> ./$NEW_CLUSTER_SCRIPT_NAME
@@ -182,7 +182,7 @@ echo -e "\n" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "for X in \$( seq 0 \$PXC_START_TIMEOUT ); do" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "  sleep 1" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "  if ! ps --pid \$mysqld_pid >/dev/null; then" >> ./$JOIN_CLUSTER_SCRIPT_NAME
-echo "    echo 'Process mysqld (\$mysqld_pid) failed to start'" >> ./$JOIN_CLUSTER_SCRIPT_NAME
+echo "    echo \"Process mysqld (\$mysqld_pid) failed to start\"" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "    exit 1" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "  fi" >> ./$JOIN_CLUSTER_SCRIPT_NAME
 echo "  if ${BUILD}/bin/mysqladmin -uroot -S$NODE_DATADIR/socket.sock ping > /dev/null 2>&1; then" >> ./$JOIN_CLUSTER_SCRIPT_NAME
