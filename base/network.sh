@@ -61,7 +61,6 @@ while [[ $# -gt 0 ]]; do
     case $param in
         --target )
             target_ip="${value}"
-            shift
         ;;
         --port )
             if [[ $value == 'mysql' ]]; then
@@ -76,8 +75,6 @@ while [[ $# -gt 0 ]]; do
             else
                 port_option="--dport $value"
             fi
-
-            shift
         ;;
         *)
           echo "ERROR: unknown parameter \"$1\""
