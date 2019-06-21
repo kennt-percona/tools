@@ -83,7 +83,7 @@ echo "" > ./${INFO_SCRIPT_NAME}
 echo "Node name     : ${NODE_NAME}" >> ./${INFO_SCRIPT_NAME}
 echo "MySQL version : ${mysql_version}" >> ./${INFO_SCRIPT_NAME}
 echo "Datadir       : ${NODE_DATADIR}" >> ./${INFO_SCRIPT_NAME}
-echo "Socket        : ${NODE_DATADIR}/socket.sock}" >> ./${INFO_SCRIPT_NAME}
+echo "Socket        : ${NODE_DATADIR}/socket.sock" >> ./${INFO_SCRIPT_NAME}
 echo "IP address    : ${IPADDR}" >> ./${INFO_SCRIPT_NAME}
 echo "Client port   : ${RBASE}" >> ./${INFO_SCRIPT_NAME}
 echo "Galera port   : ${LPORT}" >> ./${INFO_SCRIPT_NAME}
