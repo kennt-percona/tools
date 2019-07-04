@@ -26,6 +26,7 @@ wsrep-sst-auth="root:"
 master-info-repository=TABLE
 relay-log-info-repository=TABLE
 
+pxc-maint-transition-period=2
 
 #
 # Async Master settings

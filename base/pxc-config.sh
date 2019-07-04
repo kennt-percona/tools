@@ -55,7 +55,7 @@ STOP_SCRIPT_NAME="${NODE_NAME}_stop"
 CL_SCRIPT_NAME="${NODE_NAME}_cl"
 QUERY_SCRIPT_NAME="${NODE_NAME}_query"
 WIPE_SCRIPT_NAME="${NODE_NAME}_wipe"
-INFO_SCRIPT_NAME="${NODE_NAME}_info"
+INFO_SCRIPT_NAME="${NODE_NAME}.info"
 
 
 if [[ ! -r "${CONFIG_FILE_PATH}" ]]; then
@@ -79,8 +79,7 @@ echo ""
 declare mysql_version=$(get_version "${BUILD}/bin/mysqld")
 
 # Info script (prints out information about the node)
-echo "" > ./${INFO_SCRIPT_NAME}
-echo "Node name     : ${NODE_NAME}" >> ./${INFO_SCRIPT_NAME}
+echo "Node name     : ${NODE_NAME}" > ./${INFO_SCRIPT_NAME}
 echo "MySQL version : ${mysql_version}" >> ./${INFO_SCRIPT_NAME}
 echo "Datadir       : ${NODE_DATADIR}" >> ./${INFO_SCRIPT_NAME}
 echo "Socket        : ${NODE_DATADIR}/socket.sock" >> ./${INFO_SCRIPT_NAME}
@@ -88,6 +87,8 @@ echo "IP address    : ${IPADDR}" >> ./${INFO_SCRIPT_NAME}
 echo "Client port   : ${RBASE}" >> ./${INFO_SCRIPT_NAME}
 echo "Galera port   : ${LPORT}" >> ./${INFO_SCRIPT_NAME}
 echo "SST port      : ${RPORT}" >> ./${INFO_SCRIPT_NAME}
+echo "Cluster address: ${IPADDR}:${LPORT}" >> ./${INFO_SCRIPT_NAME}
+echo "" >> ./${INFO_SCRIPT_NAME}
 
 
 #
@@ -174,6 +175,10 @@ echo "fi" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo -e "\n" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "CLUSTER_ADDRESS=\$1" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "if [[ -r "\$1.info" ]]; then" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "  CLUSTER_ADDRESS=\$(cat "\$1.info" | grep \"Cluster address\" | cut -d':' -f2-)" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "  CLUSTER_ADDRESS=\${CLUSTER_ADDRESS# }" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "fi" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "PXC_MYEXTRA=\"\"" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "PXC_START_TIMEOUT=30"  >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo -e "\n" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
@@ -181,6 +186,7 @@ echo "echo 'Starting PXC nodes..'" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo -e "\n" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 
 echo "echo 'Starting $NODE_NAME..'" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
+echo "echo \"Joining cluster at \$CLUSTER_ADDRESS\"" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 
 echo "${BUILD}/bin/mysqld --defaults-file="${CONFIG_FILE_PATH}" --defaults-group-suffix=.$NODE_NAME \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
 echo "    --port=$RBASE \\" >> ./${JOIN_CLUSTER_SCRIPT_NAME}
