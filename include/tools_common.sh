@@ -174,6 +174,7 @@ function mysql_ping_node()
 # Globals:
 #   CLUSTER_ADDRESS (overwrites if bootstrapped = 1)
 #   PXC_MYEXTRA
+#   PXC_START_TIMEOUT
 #
 # Arguments:
 #   (1) : the node name (used to find the info file)
@@ -266,6 +267,7 @@ function start_node()
 #
 # Globals:
 #   PXC_MYEXTRA
+#   PXC_START_TIMEOUT
 #
 # Arguments:
 #   (1) : the node name (used to find the info file)
@@ -275,8 +277,8 @@ function start_mysql()
   local node_name=${1}
 
   local node_info_path
-  local ip_address port galera_port sst_port
-  local basedir datadir config_file_path socket
+  local ip_address port
+  local basedir config_file_path socket
   local mysqld_path mysql_version
   local more_options=""
   local mysqld_pid

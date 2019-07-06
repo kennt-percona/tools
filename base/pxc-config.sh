@@ -56,6 +56,7 @@ if [[ ! -x $MYSQLD_PATH ]]; then
   exit 1
 fi
 declare mysql_version=$(get_version "${MYSQLD_PATH}")
+
 # Info file (information about a named node)
 echo "node-name     : ${NODE_NAME}" > ./${INFO_SCRIPT_NAME}
 echo "mysql-version : ${mysql_version}" >> ./${INFO_SCRIPT_NAME}
