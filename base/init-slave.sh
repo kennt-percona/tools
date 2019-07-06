@@ -1,6 +1,9 @@
 #!/bin/bash
-# Created by Ramesh Sivaraman, Percona LLC
 #
+set -o pipefail   # Expose hidden failures
+set -o nounset    # Expose unset variables
+
+. $(dirname $0)/../include/tools_common.sh
 
 #
 # Global variables
@@ -20,40 +23,46 @@ if [[ "$#" -ne 2 && "$#" -ne 3 ]]; then
   exit 1
 fi
 
-declare     SLAVE_NODE_NAME=$1
-declare     MASTER_NODE_NAME=$2
+declare     MASTER_NODE_NAME=$1
+declare     SLAVE_NODE_NAME=$2
 
-declare     CHANNDEL_NAME=""
-declare     MASTER_CHANNEL=""
+declare     CHANNEL_NAME=""
+declare     CHANNEL_OPTIONS=""
 
 if [[ "$#" == "3" ]]; then
   CHANNEL_NAME=$3
-  MASTER_CHANNEL="FOR CHANNEL '${3}'"
+  CHANNEL_OPTIONS="FOR CHANNEL '${3}'"
 fi
 
-declare     DATADIR_BASE_PATH="${BUILD}"
-declare     NODE_DATADIR="${DATADIR_BASE_PATH}/${SLAVE_NODE_NAME}"
-
-if [[ ! -r "${MASTER_NODE_NAME}.info" ]]; then
-  echo "\"Cannot find the \${MASTER_NODE_NAME}}.info\" file"
+master_node_info_path="${MASTER_NODE_NAME}.info"
+if [[ ! -r ${master_node_info_path} ]]; then
+  echo "Error: Cannot find the ${master_node_info_path} file"
   exit 1
 fi
 
-MASTER_IP=$(cat "${MASTER_NODE_NAME}.info" | grep "IP address" | cut -d':' -f2)
-MASTER_IP=$(echo $MASTER_IP)
+slave_node_info_path="${SLAVE_NODE_NAME}.info"
+if [[ ! -r ${slave_node_info_path} ]]; then
+  echo "Error: Cannot find the ${slave_node_info_path} file"
+  exit 1
+fi
 
-MASTER_PORT=$(cat "${MASTER_NODE_NAME}.info" | grep "Client port" | cut -d':' -f2)
-MASTER_PORT=$(echo $MASTER_PORT)
+# get info from the info file
+master_ip_address=$(info_get_variable "${master_node_info_path}" "ip-address")
+master_port=$(info_get_variable "${master_node_info_path}" "client-port")
+
+basedir=$(info_get_variable "${slave_node_info_path}" "basedir")
+socket=$(info_get_variable "${slave_node_info_path}" "socket")
+
 
 #
 # Configure the slave for replication
 #
-echo 'Setting up the slave to connect to the master'
-echo "Setting the channel: host:$MASTER_IP port:$MASTER_PORT channel_name:$CHANNEL_NAME"
+echo "Setting up the slave($SLAVE_NODE_NAME) to connect to the master($MASTER_NODE_NAME)"
+echo "Setting the channel: host:$master_ip_address port:$master_port channel_name:$CHANNEL_NAME"
 
-${BUILD}/bin/mysql -S${NODE_DATADIR}/socket.sock -uroot <<EOF
+${basedir}/bin/mysql -S${socket} -uroot <<EOF
   STOP SLAVE;
-  CHANGE MASTER TO MASTER_HOST='$MASTER_IP', MASTER_PORT=$MASTER_PORT, MASTER_USER='repl', MASTER_PASSWORD='repl' ${MASTER_CHANNEL};
+  CHANGE MASTER TO MASTER_HOST='$master_ip_address', MASTER_PORT=$master_port, MASTER_USER='repl', MASTER_PASSWORD='repl' ${CHANNEL_OPTIONS};
 EOF
 
-echo "Slave configured.  Run 'start slave'"
+echo "Slave configured.  Run 'start slave' to start async replication."

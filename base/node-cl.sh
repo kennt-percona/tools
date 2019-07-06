@@ -4,12 +4,12 @@ set -o nounset    # Expose unset variables
 
 . $(dirname $0)/../include/tools_common.sh
 
-if (( "$#" != 1 )); then
-  echo "Incorrect number of parameters"
+# Globals
+if [[ "$#" -ne 1 ]]; then
+  echo "ERROR: Incorrect number of parameters"
   echo ""
-  echo "Usage:  init-master.sh <node-name>"
-  echo ""
-  echo "Initializes the node for being an async master"
+  echo "Usage: node-cl.sh <node-name>"
+  echo "  Opens a mysql shell to a node."
   echo ""
   exit 1
 fi
@@ -28,14 +28,11 @@ port=$(info_get_variable "${node_info_path}" "client-port")
 basedir=$(info_get_variable "${node_info_path}" "basedir")
 socket=$(info_get_variable "${node_info_path}" "socket")
 
-
-#
-# Configure the master for replication
-#
-echo 'Setting up the user account on the master'
-
-${basedir}/bin/mysql -S${socket} -uroot <<EOF
-  CREATE USER 'repl'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'repl'; 
-  GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
-  FLUSH PRIVILEGES;
-EOF
+if [[ -e $socket ]]; then
+	# local connection
+	${basedir}/bin/mysql -A -S${socket} -uroot
+else
+	# (possibly) remote connection
+	echo "Could not find socket file, trying ${ip_address}:${port}"
+	${basedir}/bin/mysql -A --host=${ip_address} --port=${port} --protocol=tcp -uroot
+fi
