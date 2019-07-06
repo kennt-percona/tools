@@ -2,7 +2,7 @@
 set -o pipefail   # Expose hidden failures
 set -o nounset    # Expose unset variables
 
-. $(dirname $0)/../include/tools_common.sh
+. $(dirname $(realpath $0))/../include/tools_common.sh
 
 if (( "$#" != 1 )); then
   echo "Incorrect number of parameters"

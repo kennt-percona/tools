@@ -6,7 +6,7 @@
 set -o pipefail   # Expose hidden failures
 set -o nounset    # Expose unset variables
 
-. $(dirname $0)/../include/tools_common.sh
+. $(dirname $(realpath $0))/../include/tools_common.sh
 
 # check for config file parameter
 if (( "$#" != 4 )); then

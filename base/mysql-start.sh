@@ -2,7 +2,7 @@
 set -o pipefail   # Expose hidden failures
 set -o nounset    # Expose unset variables
 
-. $(dirname $0)/../include/tools_common.sh
+. $(dirname $(realpath $0))/../include/tools_common.sh
 
 # Globals
 declare  -i PXC_START_TIMEOUT=30
