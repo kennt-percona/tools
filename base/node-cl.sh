@@ -5,13 +5,18 @@ set -o nounset    # Expose unset variables
 . $(dirname $(realpath $0))/../include/tools_common.sh
 
 # Globals
-if [[ "$#" -ne 1 ]]; then
+if [[ "$#" -lt 1 && "$#" -gt 2 ]]; then
   echo "ERROR: Incorrect number of parameters"
   echo ""
-  echo "Usage: node-cl.sh <node-name>"
+  echo "Usage: node-cl.sh <node-name> [<options>]"
   echo "  Opens a mysql shell to a node."
   echo ""
   exit 1
+fi
+
+cl_options=""
+if [[ "$#" -ge 2 ]]; then
+  cl_options=$2
 fi
 
 node_name="${1}"
@@ -30,9 +35,9 @@ socket=$(info_get_variable "${node_info_path}" "socket")
 
 if [[ -e $socket ]]; then
 	# local connection
-	${basedir}/bin/mysql -A -S${socket} -uroot
+	${basedir}/bin/mysql -A -S${socket} -uroot ${cl_options}
 else
 	# (possibly) remote connection
 	echo "Could not find socket file, trying ${ip_address}:${port}"
-	${basedir}/bin/mysql -A --host=${ip_address} --port=${port} --protocol=tcp -uroot
+	${basedir}/bin/mysql -A --host=${ip_address} --port=${port} --protocol=tcp -uroot ${cl_options}
 fi

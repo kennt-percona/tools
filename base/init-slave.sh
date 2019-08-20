@@ -13,7 +13,7 @@ declare     BUILD=$(pwd)
 if [[ "$#" -ne 2 && "$#" -ne 3 ]]; then
   echo "Incorrect number of parameters"
   echo ""
-  echo "Usage:  init-slave.sh <slave-node>  <master-node> [<channel-name>]"
+  echo "Usage:  init-slave.sh <master-node>  <slave-node> [<channel-name>]"
   echo ""
   echo "If <channel-name> is specified, that will be the name used for the channel"
   echo "This is used for multi-source replication"

@@ -169,7 +169,7 @@ function mysql_ping_node()
   fi
 }
 
-# Starts up a PXC
+# Starts up a PXC node
 #
 # Globals:
 #   CLUSTER_ADDRESS (overwrites if bootstrapped = 1)
@@ -191,6 +191,8 @@ function start_node()
   local mysqld_path mysql_version
   local more_options=""
   local mysqld_pid
+  local my_print_defaults_path
+  local more_wsrep_provider_options
 
   node_info_path="${node_name}.info"
 
@@ -225,6 +227,13 @@ function start_node()
   fi
   mysql_version=$(get_version "${mysqld_path}")
 
+
+  my_print_defaults_path="${basedir}/bin/my_print_defaults"
+
+  # check to see if there is a wsrep_provider_options in the cnf file
+  more_wsrep_provider_options=$(${my_print_defaults_path} --defaults-file=${config_file_path} mysqld |
+    grep wsrep[_-]provider[-_]options | cut -d'=' -f2-)
+
   echo "--------------------------------"
   echo "Starting ${node_name} with MySQL ${mysql_version} (${mysqld_path})"
   if [[ $is_bootstrapped -eq 1 ]]; then
@@ -241,7 +250,7 @@ function start_node()
     --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} \
     --wsrep_sst_receive_address=${ip_address}:${sst_port} \
     --wsrep_node_incoming_address=${ip_address} \
-    --wsrep_provider_options=";gmcast.listen_addr=tcp://${ip_address}:${galera_port};gmcast.segment=1" \
+    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port};gmcast.segment=1" \
     ${more_options}  > ${error_log_path} 2>&1 &
   mysqld_pid=$!
 
@@ -261,6 +270,84 @@ function start_node()
     CLUSTER_ADDRESS=$(printf "%s:%d" ${ip_address} ${galera_port})
   fi
 }
+
+
+# Starts up the node under GDB
+# So this function will not exit
+function gdb_start_node()
+{
+  local node_name=${1}
+  local is_bootstrapped=${2}
+
+  local node_info_path
+  local ip_address port galera_port sst_port
+  local basedir datadir config_file_path socket
+  local mysqld_path mysql_version
+  local more_options=""
+  local mysqld_pid
+  local my_print_defaults_path
+  local more_wsrep_provider_options
+
+  node_info_path="${node_name}.info"
+
+  if [[ ! -r ${node_info_path} ]]; then
+    echo "Error: Cannot find the ${node_info_path} file"
+    exit 1
+  fi
+
+  if [[ $is_bootstrapped -eq 0 && -z $CLUSTER_ADDRESS ]]; then
+    echo "ERROR: this is not a boostrapped node,"
+    echo "so CLUSTER_ADDRESS must be set before calling this function."
+    exit 1
+  fi
+
+  # get info from the info file
+  ip_address=$(info_get_variable "${node_info_path}" "ip-address")
+  port=$(info_get_variable "${node_info_path}" "client-port")
+  galera_port=$(info_get_variable "${node_info_path}" "galera-port")
+  sst_port=$(info_get_variable "${node_info_path}" "sst-port")
+  basedir=$(info_get_variable "${node_info_path}" "basedir")
+  datadir=$(info_get_variable "${node_info_path}" "datadir")
+  config_file_path=$(info_get_variable "${node_info_path}" "config-file")
+  error_log_path=$(info_get_variable "${node_info_path}" "error-log-file")
+  socket=$(info_get_variable "${node_info_path}" "socket")
+
+
+  mysqld_path="${basedir}/bin/mysqld"
+  if [[ ! -x $mysqld_path ]]; then
+    echo "ERROR: Cannot find the mysqld executable"
+    echo "Expected location: ${mysqld_path}"
+    exit 1
+  fi
+  mysql_version=$(get_version "${mysqld_path}")
+
+
+  my_print_defaults_path="${basedir}/bin/my_print_defaults"
+
+  # check to see if there is a wsrep_provider_options in the cnf file
+  more_wsrep_provider_options=$(${my_print_defaults_path} --defaults-file=${config_file_path} mysqld |
+    grep wsrep[_-]provider[-_]options | cut -d'=' -f2-)
+
+  echo "--------------------------------"
+  echo "Starting ${node_name} with MySQL ${mysql_version} (${mysqld_path})"
+  if [[ $is_bootstrapped -eq 1 ]]; then
+    echo "${node_name} will be bootstrapped (--wsrep-new-cluster)"
+    more_options="--wsrep-new-cluster"
+  else
+    echo "${node_name} will be joining the cluster at (${CLUSTER_ADDRESS})"
+  fi
+
+  gdb --args ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
+    --gdb --port=${port} \
+    --basedir=${basedir} $PXC_MYEXTRA \
+    --wsrep-provider=${basedir}/lib/libgalera_smm.so \
+    --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} \
+    --wsrep_sst_receive_address=${ip_address}:${sst_port} \
+    --wsrep_node_incoming_address=${ip_address} \
+    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port};gmcast.segment=1" \
+    ${more_options}
+}
+
 
 
 # Starts up a standalone node (non-PXC)
@@ -313,7 +400,7 @@ function start_mysql()
   ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
     --port=${port} \
     --basedir=${basedir} $PXC_MYEXTRA \
-    --wsrep-provider= \
+    --wsrep-provider=none \
     ${more_options}  > ${error_log_path} 2>&1 &
   mysqld_pid=$!
 

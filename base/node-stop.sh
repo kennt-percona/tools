@@ -41,7 +41,7 @@ for node_name in "$@"; do
 
   if [[ -r $socket ]]; then
     ${mysqladmin_path} -uroot -S${socket} shutdown
-    echo 'Server with socket ${socket} halted'
+    echo "Server with socket ${socket} halted"
   fi
 
 done
