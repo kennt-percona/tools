@@ -400,7 +400,6 @@ function start_mysql()
   ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
     --port=${port} \
     --basedir=${basedir} $PXC_MYEXTRA \
-    --wsrep-provider=none \
     ${more_options}  > ${error_log_path} 2>&1 &
   mysqld_pid=$!
 
