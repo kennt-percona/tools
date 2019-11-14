@@ -20,7 +20,6 @@ if [[ "$#" -eq 0 ]]; then
   exit 1
 fi
 
-
 for node_name in "$@"; do
   node_info_path="${node_name}.info"
 
@@ -34,6 +33,8 @@ for node_name in "$@"; do
   port=$(info_get_variable "${node_info_path}" "client-port")
   basedir=$(info_get_variable "${node_info_path}" "basedir")
   datadir=$(info_get_variable "${node_info_path}" "datadir")
+  datadir_name=$(info_get_variable "${node_info_path}" "datadir_name")
+  datadir_base_path=$(info_get_variable "${node_info_path}" "datadir_base")
   config_file_path=$(info_get_variable "${node_info_path}" "config-file")
 
 
@@ -49,7 +50,9 @@ for node_name in "$@"; do
   echo "Initializing ${node_name} with MySQL ${mysql_version} (${mysqld_path})"
 
   echo "Creating datadir (${datadir})"
-  mkdir -p ${datadir}
+  pushd ${datadir_base_path} >/dev/null
+  mkdir ${datadir_name}
+  popd >/dev/null
 
   echo "Replacing DATADIR_BASE_PATH with ${basedir} in ${config_file_path}"
   # Need to escape any slashes in the datadir (since it will contain a path)
@@ -69,5 +72,10 @@ for node_name in "$@"; do
   fi
 
   echo "Initializing datadir"
-  ${MID} --datadir=${datadir}  > ./startup_${node_name}.err 2>&1 || exit 1;
+  ${MID} --datadir=${datadir}  > ./startup_${node_name}.err 2>&1
+  errcode=$?
+  if [[ $errcode -ne 0 ]]; then
+    echo "Error: Database initialization failed with error code: $errcode"
+    exit 1
+  fi
 done

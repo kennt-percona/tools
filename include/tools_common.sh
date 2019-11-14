@@ -136,7 +136,7 @@ function info_get_variable()
   local variable_name=$2
   local value=""
 
-  value=$(cat ${info_file_name} | grep "${variable_name}" | cut -d':' -f2-)
+  value=$(cat ${info_file_name} | grep -w "${variable_name}" | cut -d':' -f2-)
   value=$(echo $value)
 
   printf "%s" $value

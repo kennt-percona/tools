@@ -61,6 +61,8 @@ declare mysql_version=$(get_version "${MYSQLD_PATH}")
 echo "node-name     : ${NODE_NAME}" > ./${INFO_SCRIPT_NAME}
 echo "mysql-version : ${mysql_version}" >> ./${INFO_SCRIPT_NAME}
 echo "basedir       : ${BUILD}" >> ./${INFO_SCRIPT_NAME}
+echo "datadir_base  : ${DATADIR_BASE_PATH}" >> ./${INFO_SCRIPT_NAME}
+echo "datadir_name  : ${NODE_NAME}" >> ./${INFO_SCRIPT_NAME}
 echo "datadir       : ${NODE_DATADIR}" >> ./${INFO_SCRIPT_NAME}
 echo "socket        : ${NODE_DATADIR}/socket.sock" >> ./${INFO_SCRIPT_NAME}
 echo "ip-address    : ${IPADDR}" >> ./${INFO_SCRIPT_NAME}
