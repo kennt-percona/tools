@@ -92,6 +92,8 @@ function backup_volume() {
     echo "Backup to $backup_dir started"
     request_streaming
 
+    # Receive the sst meta-info file
+    #
     echo "Starting socat(1)"
     timeout -k 45 40 socat -u "$SOCAT_OPTS" stdio > xtrabackup.stream.1
     if [[ $? -ne 0 ]]; then
@@ -102,13 +104,27 @@ function backup_volume() {
 
     stat xtrabackup.stream.1
 
+    # Receive the wsrep_state.dat file
+    #
     echo "Starting socat(2)"
-    socat -u "$SOCAT_OPTS" stdio > xtrabackup.stream.2
+    timeout -k 45 40 socat -u "$SOCAT_OPTS" stdio > xtrabackup.stream.2
+    if [[ $? -ne 0 ]]; then
+        echo "socat(2) failed"
+        exit 1
+    fi
     echo "socat(2) returned $?"
+
+    stat xtrabackup.stream.2
+
+    # Receive the backup from xtrabackup
+    #
+    echo "Starting socat(3)"
+    socat -u "$SOCAT_OPTS" stdio > xtrabackup.stream.3
+    echo "socat(3) returned $?"
 
     echo "Backup finished"
 
-    stat xtrabackup.stream.2
+    stat xtrabackup.stream.3
 }
 
 backup_volume
