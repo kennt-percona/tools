@@ -35,4 +35,4 @@ ip_address=$(info_get_variable "${node_info_path}" "ip-address")
 galera_port=$(info_get_variable "${node_info_path}" "galera-port")
 CLUSTER_ADDRESS="${ip_address}:${galera_port}"
 
-gdb_start_node "${second_node_name}" 0
+gdb_start_node "${second_node_name}" 0 "${first_node_name}"

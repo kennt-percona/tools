@@ -31,5 +31,6 @@ shift
 start_node "${first_node_name}" 1
 
 for node_name in "$@"; do
+  copy_ssl_certs "${first_node_name}" "${node_name}"
   start_node "${node_name}" 0
 done

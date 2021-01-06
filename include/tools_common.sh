@@ -179,11 +179,17 @@ function mysql_ping_node()
 # Arguments:
 #   (1) : the node name (used to find the info file)
 #   (2) : 1 if node is to be bootstrapped, 0 otherwise
+#   (3) : (optional) if not bootstrapped, then this is
+#         used as the SST donor node (if specified)
 #
 function start_node()
 {
   local node_name=${1}
   local is_bootstrapped=${2}
+  local wsrep_sst_donor=""
+  if [[ is_bootstrapped -ne 1 && $# -eq 3 ]]; then
+    wsrep_sst_donor="--wsrep_sst_donor=${3}"
+  fi
 
   local node_info_path
   local ip_address port galera_port sst_port
@@ -243,14 +249,20 @@ function start_node()
     echo "${node_name} will be joining the cluster at (${CLUSTER_ADDRESS})"
   fi
 
+  # For the server to startup, ensure that the path to the datadir exists
+  # (it can be empty, but must exist)
+  mkdir -p "${datadir}"
+
   ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
     --port=${port} \
+    --debug-sync-timeout \
+    ${wsrep_sst_donor} \
     --basedir=${basedir} $PXC_MYEXTRA \
     --wsrep-provider=${basedir}/lib/libgalera_smm.so \
     --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} \
     --wsrep_sst_receive_address=${ip_address}:${sst_port} \
     --wsrep_node_incoming_address=${ip_address} \
-    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port};gmcast.segment=1" \
+    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port}" \
     ${more_options}  > ${error_log_path} 2>&1 &
   mysqld_pid=$!
 
@@ -278,6 +290,11 @@ function gdb_start_node()
 {
   local node_name=${1}
   local is_bootstrapped=${2}
+  local sst_donor=""
+
+  if [[ $# -ge 3 ]]; then
+    sst_donor="--wsrep_sst_donor=${3}"
+  fi
 
   local node_info_path
   local ip_address port galera_port sst_port
@@ -296,7 +313,7 @@ function gdb_start_node()
   fi
 
   if [[ $is_bootstrapped -eq 0 && -z $CLUSTER_ADDRESS ]]; then
-    echo "ERROR: this is not a boostrapped node,"
+    echo "ERROR: this is not a bootstrapped node,"
     echo "so CLUSTER_ADDRESS must be set before calling this function."
     exit 1
   fi
@@ -339,12 +356,13 @@ function gdb_start_node()
 
   gdb --args ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
     --gdb --port=${port} \
+    ${sst_donor} \
     --basedir=${basedir} $PXC_MYEXTRA \
     --wsrep-provider=${basedir}/lib/libgalera_smm.so \
     --wsrep_cluster_address=gcomm://${CLUSTER_ADDRESS} \
     --wsrep_sst_receive_address=${ip_address}:${sst_port} \
     --wsrep_node_incoming_address=${ip_address} \
-    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port};gmcast.segment=1" \
+    --wsrep_provider_options="${more_wsrep_provider_options};gmcast.listen_addr=tcp://${ip_address}:${galera_port}" \
     ${more_options}
 }
 
@@ -414,4 +432,40 @@ function start_mysql()
       break
     fi
   done
+}
+
+
+function copy_ssl_certs()
+{
+  local from_node="$1"
+  local to_node="$2"
+
+  if [[ -z $from_node || -z $to_node ]]; then
+    echo "Missing a directory name: from:$from_node to:$to_node"
+    exit 1
+  fi
+
+  local from_nodeinfo to_nodeinfo
+  local from_datadir to_datadir
+
+  from_nodeinfo="${from_node}.info"
+  to_nodeinfo="${to_node}.info"
+
+  if [[ ! -r ${from_nodeinfo} ]]; then
+    echo "Error: Cannot find the ${from_nodeinfo} file"
+    exit 1
+  fi
+
+  if [[ ! -r ${to_nodeinfo} ]]; then
+    echo "Error: Cannot find the ${to_nodeinfo} file"
+    exit 1
+  fi
+
+  # get info from the info file
+  from_datadir=$(info_get_variable "${from_nodeinfo}" "datadir")
+  to_datadir=$(info_get_variable "${to_nodeinfo}" "datadir")
+
+  # Copy over all of the pem files
+  echo "Copying over SSL certs to ${to_datadir}"
+  cp ${from_datadir}/*.pem "${to_datadir}/"
 }
