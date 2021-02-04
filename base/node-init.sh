@@ -50,6 +50,7 @@ for node_name in "$@"; do
   echo "Initializing ${node_name} with MySQL ${mysql_version} (${mysqld_path})"
 
   echo "Creating datadir (${datadir})"
+  mkdir -p "${datadir_base_path}"
   pushd ${datadir_base_path} >/dev/null
   mkdir ${datadir_name}
   popd >/dev/null
