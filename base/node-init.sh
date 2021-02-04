@@ -52,7 +52,7 @@ for node_name in "$@"; do
   echo "Creating datadir (${datadir})"
   mkdir -p "${datadir_base_path}"
   pushd ${datadir_base_path} >/dev/null
-  mkdir ${datadir_name}
+  mkdir -p ${datadir_name}
   popd >/dev/null
 
   echo "Replacing DATADIR_BASE_PATH with ${basedir} in ${config_file_path}"

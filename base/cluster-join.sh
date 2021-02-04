@@ -36,5 +36,5 @@ galera_port=$(info_get_variable "${node_info_path}" "galera-port")
 CLUSTER_ADDRESS="${ip_address}:${galera_port}"
 
 for node_name in "$@"; do
-  start_node "${node_name}" 0
+  start_node "${node_name}" 0 "${first_node_name}"
 done

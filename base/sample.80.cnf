@@ -23,7 +23,7 @@ mysqlx=0
 
 binlog-format=ROW
 
-wsrep-debug=ON
+wsrep-debug=1
 wsrep-cluster-name=my_cluster
 wsrep-sst-method=xtrabackup-v2
 
