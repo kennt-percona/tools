@@ -15,5 +15,7 @@ fi
 BRANCH1=$1
 BRANCH2=$2
 NEW_BRANCH=$3
-
-git checkout -b ${NEW_BRANCH} $(git rev-list ${BRANCH1} ^${BRANCH2} --first-parent --topo-order | tail -1)^
+gca_commit=$(git show $(git rev-list ${BRANCH1} ^${BRANCH2} --first-parent --topo-order | tail -1)^ | head -1 | awk '{print $2}')
+echo "Checking out branch at ${gca_commit}"
+git log ${gca_commit}
+git checkout -b ${NEW_BRANCH} ${gca_commit}
