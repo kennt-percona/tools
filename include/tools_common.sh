@@ -376,16 +376,17 @@ function gdb_start_node()
 #
 # Arguments:
 #   (1) : the node name (used to find the info file)
+#   (2) : list of additional options
 #
 function start_mysql()
 {
   local node_name=${1}
+  local more_options="${2}"
 
   local node_info_path
   local ip_address port
   local basedir config_file_path socket
   local mysqld_path mysql_version
-  local more_options=""
   local mysqld_pid
 
   node_info_path="${node_name}.info"
@@ -414,6 +415,7 @@ function start_mysql()
 
   echo "--------------------------------"
   echo "Starting standalone ${node_name} with MySQL ${mysql_version} (${mysqld_path})"
+  [[ -n $more_options ]] && echo "  with options '${more_options}'"
 
   ${mysqld_path} --defaults-file=${config_file_path} --defaults-group-suffix=.${node_name} \
     --port=${port} \
